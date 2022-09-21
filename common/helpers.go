@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Play-Economy37/Play.Common/types"
-	"github.com/Play-Economy37/Play.Common/validator"
+	"github.com/PlayEconomy37/Play.Common/types"
+	"github.com/PlayEconomy37/Play.Common/validator"
 	"github.com/go-chi/chi/v5"
 )
 

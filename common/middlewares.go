@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Play-Economy37/Play.Common/opentelemetry"
+	"github.com/PlayEconomy37/Play.Common/opentelemetry"
 	"github.com/felixge/httpsnoop"
 )
 

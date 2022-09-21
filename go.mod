@@ -1,4 +1,4 @@
-module github.com/Play-Economy37/Play.Common
+module github.com/PlayEconomy37/Play.Common
 
 go 1.19
 

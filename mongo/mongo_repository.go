@@ -3,7 +3,7 @@ package mongo
 import (
 	"context"
 
-	"github.com/Play-Economy37/Play.Common/types"
+	"github.com/PlayEconomy37/Play.Common/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

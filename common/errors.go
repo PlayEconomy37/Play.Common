@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Play-Economy37/Play.Common/types"
+	"github.com/PlayEconomy37/Play.Common/types"
 )
 
 // Generic helper for logging an error message
