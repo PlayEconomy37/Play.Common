@@ -9,7 +9,7 @@ import (
 	"github.com/felixge/httpsnoop"
 )
 
-func (app *CommonApplication) RecoverPanic(next http.Handler) http.Handler {
+func (app *App) RecoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			// Use the builtin recover function to check if there has been a panic or not
@@ -31,7 +31,7 @@ func (app *CommonApplication) RecoverPanic(next http.Handler) http.Handler {
 	})
 }
 
-func (app *CommonApplication) Metrics(appName string) func(next http.Handler) http.Handler {
+func (app *App) Metrics(appName string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		// Create Prometheus metrics
 		prometheusMetrics := opentelemetry.CreateMetrics(appName)

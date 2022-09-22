@@ -16,7 +16,7 @@ import (
 )
 
 // Retrieve the URL parameter `id` from the current request context, then convert it to an integer
-func (app *CommonApplication) ReadIDParam(r *http.Request) (int64, error) {
+func (app *App) ReadIDParam(r *http.Request) (int64, error) {
 	// Extract URL parameters from request context
 	params := chi.URLParamFromCtx(r.Context(), "id")
 
@@ -33,7 +33,7 @@ func (app *CommonApplication) ReadIDParam(r *http.Request) (int64, error) {
 // Helper for sending JSON responses. This takes the destination
 // http.ResponseWriter, the HTTP status code to send, the data to encode to JSON and a
 // header map containing any additional HTTP headers we want to include in the response.
-func (app *CommonApplication) WriteJSON(w http.ResponseWriter, status int, data types.Envelope, headers http.Header) error {
+func (app *App) WriteJSON(w http.ResponseWriter, status int, data types.Envelope, headers http.Header) error {
 	// Encode the data to JSON
 	js, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
@@ -58,7 +58,7 @@ func (app *CommonApplication) WriteJSON(w http.ResponseWriter, status int, data 
 }
 
 // Helper for reading JSON data from HTTP request to specified target
-func (app *CommonApplication) ReadJSON(w http.ResponseWriter, r *http.Request, target interface{}) error {
+func (app *App) ReadJSON(w http.ResponseWriter, r *http.Request, target interface{}) error {
 	// Use http.MaxBytesReader() to limit the size of the request body to 1MB
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
@@ -137,9 +137,9 @@ func (app *CommonApplication) ReadJSON(w http.ResponseWriter, r *http.Request, t
 	return nil
 }
 
-// The ReadStringFromQueryParams() helper returns a string value from the query string, or the provided
+// The ReadStringFromQueryString() helper returns a string value from the query string, or the provided
 // default value if no matching key could be found
-func (app *CommonApplication) ReadStringFromQueryParams(queryString url.Values, key string, defaultValue string) string {
+func (app *App) ReadStringFromQueryString(queryString url.Values, key string, defaultValue string) string {
 	// Extract the value for a given key from the query string. If no key exists this
 	// will return the empty string ""
 	value := queryString.Get(key)
@@ -152,10 +152,10 @@ func (app *CommonApplication) ReadStringFromQueryParams(queryString url.Values, 
 	return value
 }
 
-// The ReadCsvFromQueryParams() helper reads a string value from the query string and then splits it
+// The ReadCsvFromQueryString() helper reads a string value from the query string and then splits it
 // into a slice on the comma character. If no matching key could be found, it returns
 // the provided default value.
-func (app *CommonApplication) ReadCsvFromQueryParams(queryString url.Values, key string, defaultValue []string) []string {
+func (app *App) ReadCsvFromQueryString(queryString url.Values, key string, defaultValue []string) []string {
 	// Extract the value from the query string
 	csv := queryString.Get(key)
 
@@ -168,11 +168,11 @@ func (app *CommonApplication) ReadCsvFromQueryParams(queryString url.Values, key
 	return strings.Split(csv, ",")
 }
 
-// The ReadIntFromQueryParams() helper reads a string value from the query string and converts it to an
+// The ReadIntFromQueryString() helper reads a string value from the query string and converts it to an
 // integer before returning. If no matching key could be found it returns the provided
 // default value. If the value couldn't be converted to an integer, then we record an
 // error message in the provided Validator instance.
-func (app *CommonApplication) ReadIntFromQueryParams(queryString url.Values, key string, defaultValue int, v *validator.Validator) int {
+func (app *App) ReadIntFromQueryString(queryString url.Values, key string, defaultValue int, v *validator.Validator) int {
 	// Extract the value from the query string
 	str := queryString.Get(key)
 
@@ -186,6 +186,30 @@ func (app *CommonApplication) ReadIntFromQueryParams(queryString url.Values, key
 	value, err := strconv.Atoi(str)
 	if err != nil {
 		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
+
+	return value
+}
+
+// The ReadFloatFromQueryString() helper reads a string value from the query string and converts it to a
+// float64 before returning. If no matching key could be found it returns the provided
+// default value. If the value couldn't be converted to a float64, then we record an
+// error message in the provided Validator instance.
+func (app *App) ReadFloatFromQueryString(queryString url.Values, key string, defaultValue float64, v *validator.Validator) float64 {
+	// Extract the value from the query string
+	str := queryString.Get(key)
+
+	// If no key exists (or the value is empty) then return the default value
+	if str == "" {
+		return defaultValue
+	}
+
+	// Try to convert the value to a float64. If this fails, add an error message to the
+	// validator instance and return the default value.
+	value, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		v.AddError(key, "must be a float64 value")
 		return defaultValue
 	}
 

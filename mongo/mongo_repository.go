@@ -84,6 +84,10 @@ func (repo MongoRepository[T]) GetAll(ctx context.Context) ([]T, error) {
 
 	}
 
+	if err := cursor.Err(); err != nil {
+		return items, err
+	}
+
 	return items, nil
 }
 
@@ -110,6 +114,10 @@ func (repo MongoRepository[T]) GetAllByFilter(ctx context.Context, filter primit
 
 		items = append(items, item)
 
+	}
+
+	if err := cursor.Err(); err != nil {
+		return items, err
 	}
 
 	return items, nil
