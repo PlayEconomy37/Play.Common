@@ -21,19 +21,14 @@ func NewRepository[T any](client *mongo.Client, database, collection string) typ
 }
 
 // Retrieves a specific document from the collection by its id
-func (repo MongoRepository[T]) GetById(ctx context.Context, id string) (T, error) {
+func (repo MongoRepository[T]) GetById(ctx context.Context, id primitive.ObjectID) (T, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
 	var item T
 
-	objectId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return item, err
-	}
-
-	err = repo.collection.
-		FindOne(ctx, bson.M{"_id": objectId}).
+	err := repo.collection.
+		FindOne(ctx, bson.M{"_id": id}).
 		Decode(&item)
 	if err != nil {
 		return item, err
@@ -120,16 +115,11 @@ func (repo MongoRepository[T]) Create(ctx context.Context, entity T) error {
 }
 
 // Updates a specific document from the collection
-func (repo MongoRepository[T]) Update(ctx context.Context, id string, entity T) error {
+func (repo MongoRepository[T]) Update(ctx context.Context, id primitive.ObjectID, entity T) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	objectId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-
-	_, err = repo.collection.UpdateOne(ctx, bson.M{"_id": objectId}, bson.M{"$set": entity})
+	_, err := repo.collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": entity})
 
 	if err != nil {
 		return err
@@ -139,16 +129,11 @@ func (repo MongoRepository[T]) Update(ctx context.Context, id string, entity T) 
 }
 
 // Deletes a specific document from the collection
-func (repo MongoRepository[T]) Delete(ctx context.Context, id string) error {
+func (repo MongoRepository[T]) Delete(ctx context.Context, id primitive.ObjectID) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	objectId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-
-	_, err = repo.collection.DeleteOne(ctx, bson.M{"_id": objectId})
+	_, err := repo.collection.DeleteOne(ctx, bson.M{"_id": id})
 
 	if err != nil {
 		return err
