@@ -42,23 +42,6 @@ func (repo MongoRepository[T]) GetById(ctx context.Context, id string) (T, error
 	return item, nil
 }
 
-// Retrieves a specific document from the collection with the specified filter
-func (repo MongoRepository[T]) GetOneByFilter(ctx context.Context, filter primitive.M) (T, error) {
-	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
-	defer cancel()
-
-	var item T
-
-	err := repo.collection.
-		FindOne(ctx, filter).
-		Decode(&item)
-	if err != nil {
-		return item, err
-	}
-
-	return item, nil
-}
-
 // Retrieves all documents from the collection
 func (repo MongoRepository[T]) GetAll(ctx context.Context) ([]T, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)

@@ -13,22 +13,8 @@ import (
 	"github.com/PlayEconomy37/Play.Common/types"
 	"github.com/PlayEconomy37/Play.Common/validator"
 	"github.com/go-chi/chi/v5"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-// Retrieve the URL parameter `id` from the current request context, then convert it to an integer
-func (app *App) ReadIDParam(r *http.Request) (int64, error) {
-	// Extract URL parameters from request context
-	params := chi.URLParamFromCtx(r.Context(), "id")
-
-	// `ByName()` returns a string and `id` must be a positive integer so we try to convert it
-	// If `ìd` cannot be converted to an integer or if it is smaller than 1, throw error
-	id, err := strconv.ParseInt(params, 10, 64)
-	if err != nil || id < 1 {
-		return 0, errors.New("invalid id parameter")
-	}
-
-	return id, nil
-}
 
 // Helper for sending JSON responses. This takes the destination
 // http.ResponseWriter, the HTTP status code to send, the data to encode to JSON and a
@@ -135,6 +121,35 @@ func (app *App) ReadJSON(w http.ResponseWriter, r *http.Request, target interfac
 	}
 
 	return nil
+}
+
+// Retrieve the URL parameter `id` from the current request context, then convert it to an integer
+func (app *App) ReadIdParam(r *http.Request) (int64, error) {
+	// Extract URL parameters from request context
+	params := chi.URLParamFromCtx(r.Context(), "id")
+
+	// `id` must be a positive integer so we try to convert it
+	// If `ìd` cannot be converted to an integer or if it is smaller than 1, throw error
+	id, err := strconv.ParseInt(params, 10, 64)
+	if err != nil || id < 1 {
+		return 0, errors.New("invalid id parameter")
+	}
+
+	return id, nil
+}
+
+// Retrieve the URL parameter `id` from the current request context, then convert it to an ObjectID
+func (app *App) ReadObjectIdParam(r *http.Request) (primitive.ObjectID, error) {
+	// Extract URL parameters from request context
+	params := chi.URLParamFromCtx(r.Context(), "id")
+
+	// `id` must be an ObjectID so we try to convert it
+	objectID, err := primitive.ObjectIDFromHex(params)
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+
+	return objectID, nil
 }
 
 // The ReadStringFromQueryString() helper returns a string value from the query string, or the provided
