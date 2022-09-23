@@ -2,12 +2,17 @@ package mongo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/PlayEconomy37/Play.Common/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+// We'll return this error when trying to do operations on an item
+// that doesn't exist in our database
+var ErrRecordNotFound = errors.New("record not found")
 
 type MongoRepository[T any] struct {
 	collection *mongo.Collection
@@ -30,8 +35,17 @@ func (repo MongoRepository[T]) GetById(ctx context.Context, id primitive.ObjectI
 	err := repo.collection.
 		FindOne(ctx, bson.M{"_id": id}).
 		Decode(&item)
+
+	// If there was no matching item found, Decode() will return
+	// a mongo.ErrNoDocuments error. We check for this and return our custom ErrRecordNotFound
+	// error instead.
 	if err != nil {
-		return item, err
+		switch {
+		case errors.Is(err, mongo.ErrNoDocuments):
+			return item, ErrRecordNotFound
+		default:
+			return item, err
+		}
 	}
 
 	return item, nil
@@ -102,16 +116,16 @@ func (repo MongoRepository[T]) GetAllByFilter(ctx context.Context, filter primit
 }
 
 // Inserts a new document in the collection
-func (repo MongoRepository[T]) Create(ctx context.Context, entity T) error {
+func (repo MongoRepository[T]) Create(ctx context.Context, entity T) (primitive.ObjectID, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	_, err := repo.collection.InsertOne(ctx, entity)
+	result, err := repo.collection.InsertOne(ctx, entity)
 	if err != nil {
-		return err
+		return primitive.NilObjectID, err
 	}
 
-	return nil
+	return (result.InsertedID).(primitive.ObjectID), nil
 }
 
 // Updates a specific document from the collection
@@ -119,10 +133,14 @@ func (repo MongoRepository[T]) Update(ctx context.Context, id primitive.ObjectID
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	_, err := repo.collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": entity})
-
+	result, err := repo.collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": entity})
 	if err != nil {
 		return err
+	}
+
+	// No document with given id was found in the database
+	if result.MatchedCount == 0 {
+		return ErrRecordNotFound
 	}
 
 	return nil
@@ -133,10 +151,14 @@ func (repo MongoRepository[T]) Delete(ctx context.Context, id primitive.ObjectID
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	_, err := repo.collection.DeleteOne(ctx, bson.M{"_id": id})
-
+	result, err := repo.collection.DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {
 		return err
+	}
+
+	// No document with given id was found in the database
+	if result.DeletedCount == 0 {
+		return ErrRecordNotFound
 	}
 
 	return nil
