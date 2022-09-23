@@ -57,15 +57,21 @@ func (repo MongoRepository[T]) GetById(ctx context.Context, id primitive.ObjectI
 }
 
 // Retrieves all documents from the collection
-func (repo MongoRepository[T]) GetAll(ctx context.Context, name string, minPrice float64, maxPrice float64, filters filters.Filters) ([]T, error) {
+func (repo MongoRepository[T]) GetAll(
+	ctx context.Context,
+	name string,
+	minPrice float64,
+	maxPrice float64,
+	filteringOpts filters.Filters,
+) ([]T, filters.Metadata, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
 	// Find options
 	findOptions := options.Find()
-	findOptions.SetSkip(filters.Offset())
-	findOptions.SetLimit(filters.Limit())
-	findOptions.SetSort(bson.M{filters.SortColumn(): filters.SortDirection()})
+	findOptions.SetSkip(int64(filteringOpts.Offset()))
+	findOptions.SetLimit(int64(filteringOpts.Limit()))
+	findOptions.SetSort(bson.M{filteringOpts.SortColumn(): filteringOpts.SortDirection()})
 	findOptions.SetSort(bson.M{"_id": 1}) // We include a secondary sort on the id to ensure a consistent ordering
 
 	// Set filters
@@ -87,7 +93,13 @@ func (repo MongoRepository[T]) GetAll(ctx context.Context, name string, minPrice
 
 	cursor, err := repo.collection.Find(ctx, filter, findOptions)
 	if err != nil {
-		return items, err
+		return items, filters.Metadata{}, err
+	}
+
+	// Get total number of records that exist in database with given filters
+	count, err := repo.collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return items, filters.Metadata{}, err
 	}
 
 	defer cursor.Close(ctx)
@@ -96,7 +108,7 @@ func (repo MongoRepository[T]) GetAll(ctx context.Context, name string, minPrice
 		var item T
 
 		if err = cursor.Decode(&item); err != nil {
-			return items, err
+			return items, filters.Metadata{}, err
 		}
 
 		items = append(items, item)
@@ -104,10 +116,14 @@ func (repo MongoRepository[T]) GetAll(ctx context.Context, name string, minPrice
 	}
 
 	if err := cursor.Err(); err != nil {
-		return items, err
+		return items, filters.Metadata{}, err
 	}
 
-	return items, nil
+	// Generate a Metadata struct, passing in the total document count and pagination
+	// parameters from the client
+	metadata := filters.CalculateMetadata(int(count), filteringOpts.Page, filteringOpts.PageSize)
+
+	return items, metadata, nil
 }
 
 // Inserts a new document in the collection
@@ -128,7 +144,7 @@ func (repo MongoRepository[T]) Update(ctx context.Context, entity T) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	result, err := repo.collection.UpdateOne(ctx, bson.M{"_id": entity.ID(), "version": entity.Version()}, bson.M{"$set": entity})
+	result, err := repo.collection.UpdateOne(ctx, bson.M{"_id": entity.GetID(), "version": entity.GetVersion()}, bson.M{"$set": entity})
 	if err != nil {
 		return err
 	}

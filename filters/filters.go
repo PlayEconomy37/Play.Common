@@ -8,8 +8,8 @@ import (
 
 // Holds filtering parameters
 type Filters struct {
-	Page         int64
-	PageSize     int64
+	Page         int
+	PageSize     int
 	Sort         string
 	SortSafelist []string // Supported sort column values
 }
@@ -52,11 +52,11 @@ func (f Filters) SortDirection() int8 {
 }
 
 // Returns the number of records to be returned in the query
-func (f Filters) Limit() int64 {
+func (f Filters) Limit() int {
 	return f.PageSize
 }
 
 // Returns the number of rows to skip before starting to return records from the query
-func (f Filters) Offset() int64 {
+func (f Filters) Offset() int {
 	return (f.Page - 1) * f.PageSize
 }
