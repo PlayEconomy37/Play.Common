@@ -4,22 +4,27 @@ import (
 	"context"
 	"errors"
 
+	"github.com/PlayEconomy37/Play.Common/filters"
 	"github.com/PlayEconomy37/Play.Common/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+// Very specific value that is difficult to replicate
+const DEFAULT_PRICE = 51.43243344285539
 
 // We'll return this error when trying to do operations on an item
 // that doesn't exist in our database
 var ErrRecordNotFound = errors.New("record not found")
 
-type MongoRepository[T any] struct {
+type MongoRepository[T types.Entity] struct {
 	collection *mongo.Collection
 }
 
 // Creates a new mongoDB repository
-func NewRepository[T any](client *mongo.Client, database, collection string) types.Repository[T] {
+func NewRepository[T types.Entity](client *mongo.Client, database, collection string) types.Repository[T] {
 	return &MongoRepository[T]{
 		collection: client.Database(database).Collection(collection),
 	}
@@ -52,45 +57,35 @@ func (repo MongoRepository[T]) GetById(ctx context.Context, id primitive.ObjectI
 }
 
 // Retrieves all documents from the collection
-func (repo MongoRepository[T]) GetAll(ctx context.Context) ([]T, error) {
+func (repo MongoRepository[T]) GetAll(ctx context.Context, name string, minPrice float64, maxPrice float64, filters filters.Filters) ([]T, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	var items []T
+	// Find options
+	findOptions := options.Find()
+	findOptions.SetSkip(filters.Offset())
+	findOptions.SetLimit(filters.Limit())
+	findOptions.SetSort(bson.M{filters.SortColumn(): filters.SortDirection()})
+	findOptions.SetSort(bson.M{"_id": 1}) // We include a secondary sort on the id to ensure a consistent ordering
 
-	cursor, err := repo.collection.Find(ctx, bson.M{})
-	if err != nil {
-		return items, err
+	// Set filters
+	filter := bson.M{}
+
+	if name != "" {
+		filter["$text"] = bson.M{"$search": name}
 	}
 
-	defer cursor.Close(ctx)
-
-	for cursor.Next(ctx) {
-		var item T
-
-		if err = cursor.Decode(&item); err != nil {
-			return items, err
-		}
-
-		items = append(items, item)
-
+	if minPrice != DEFAULT_PRICE {
+		filter["price"] = bson.M{"$gte": minPrice}
 	}
 
-	if err := cursor.Err(); err != nil {
-		return items, err
+	if maxPrice != DEFAULT_PRICE {
+		filter["price"] = bson.M{"$gte": maxPrice}
 	}
-
-	return items, nil
-}
-
-// Retrieves all documents from the collection with the specified filter
-func (repo MongoRepository[T]) GetAllByFilter(ctx context.Context, filter primitive.M) ([]T, error) {
-	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
-	defer cancel()
 
 	var items []T
 
-	cursor, err := repo.collection.Find(ctx, filter)
+	cursor, err := repo.collection.Find(ctx, filter, findOptions)
 	if err != nil {
 		return items, err
 	}
@@ -129,11 +124,11 @@ func (repo MongoRepository[T]) Create(ctx context.Context, entity T) (primitive.
 }
 
 // Updates a specific document from the collection
-func (repo MongoRepository[T]) Update(ctx context.Context, id primitive.ObjectID, entity T) error {
+func (repo MongoRepository[T]) Update(ctx context.Context, entity T) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	result, err := repo.collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": entity})
+	result, err := repo.collection.UpdateOne(ctx, bson.M{"_id": entity.ID(), "version": entity.Version()}, bson.M{"$set": entity})
 	if err != nil {
 		return err
 	}
