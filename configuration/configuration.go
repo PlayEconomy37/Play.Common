@@ -19,13 +19,13 @@ type Config struct {
 }
 
 // Reads configuration from file and/or environment variables
-func LoadConfig() (Config, error) {
+func LoadConfig(filePath string) (Config, error) {
 	var config Config
 
 	configReader := koanf.New(".")
 
 	// Load JSON config
-	if err := configReader.Load(file.Provider("config/dev.json"), json.Parser()); err != nil {
+	if err := configReader.Load(file.Provider(filePath), json.Parser()); err != nil {
 		return config, err
 	}
 
