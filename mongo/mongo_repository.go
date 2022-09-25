@@ -26,12 +26,12 @@ var (
 	ErrEditConflict = errors.New("edit conflict")
 )
 
-type MongoRepository[T types.Entity] struct {
+type MongoRepository[T types.Entity[T]] struct {
 	collection *mongo.Collection
 }
 
 // Creates a new mongoDB repository
-func NewRepository[T types.Entity](client *mongo.Client, database, collection string) types.Repository[T] {
+func NewRepository[T types.Entity[T]](client *mongo.Client, database, collection string) types.Repository[T] {
 	return &MongoRepository[T]{
 		collection: client.Database(database).Collection(collection),
 	}

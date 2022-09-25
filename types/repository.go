@@ -8,7 +8,7 @@ import (
 )
 
 // Generic repository interface
-type Repository[T Entity] interface {
+type Repository[T Entity[T]] interface {
 	GetById(ctx context.Context, id primitive.ObjectID) (T, error)
 	GetAll(ctx context.Context, name string, minPrice float64, maxPrice float64, filteringOpts filters.Filters) ([]T, filters.Metadata, error)
 	Create(ctx context.Context, entity T) (primitive.ObjectID, error)
