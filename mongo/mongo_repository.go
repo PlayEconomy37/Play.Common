@@ -151,7 +151,11 @@ func (repo MongoRepository[T]) Update(ctx context.Context, entity T) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	result, err := repo.collection.UpdateOne(ctx, bson.M{"_id": entity.GetID(), "version": entity.GetVersion()}, bson.M{"$set": entity})
+	result, err := repo.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": entity.GetID(), "version": entity.GetVersion()},
+		bson.M{"$set": entity.SetVersion(entity.GetVersion() + 1)},
+	)
 	if err != nil {
 		return err
 	}
