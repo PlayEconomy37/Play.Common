@@ -7,5 +7,5 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type Entity interface {
 	GetID() primitive.ObjectID
 	GetVersion() int32
-	SetVersion(int32) Entity
+	SetVersion(version int32) Entity
 }
