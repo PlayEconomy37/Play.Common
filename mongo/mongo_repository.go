@@ -15,9 +15,16 @@ import (
 // Very specific value that is difficult to replicate
 const DEFAULT_PRICE = 51.43243344285539
 
-// We'll return this error when trying to do operations on an item
-// that doesn't exist in our database
-var ErrRecordNotFound = errors.New("record not found")
+var (
+	// We'll return this error when trying to fetch an item
+	// that doesn't exist in our database
+	ErrRecordNotFound = errors.New("record not found")
+
+	// We'll return this error when trying to update an item
+	// in which the document version does not match
+	// (or the record has been deleted).
+	ErrEditConflict = errors.New("edit conflict")
+)
 
 type MongoRepository[T types.Entity] struct {
 	collection *mongo.Collection
@@ -151,7 +158,7 @@ func (repo MongoRepository[T]) Update(ctx context.Context, entity T) error {
 
 	// No document with given id was found in the database
 	if result.MatchedCount == 0 {
-		return ErrRecordNotFound
+		return ErrEditConflict
 	}
 
 	return nil
