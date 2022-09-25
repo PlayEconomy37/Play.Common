@@ -17,8 +17,8 @@ type Filters struct {
 // Validate filters received as query parameters
 func ValidateFilters(v *validator.Validator, f Filters) {
 	// Check that the page and page_size parameters contain sensible values
-	v.Check(validator.Between(f.Page, 0, 10_000_000), "page", "must be greater than zero and lower than 10 million")
-	v.Check(validator.Between(f.PageSize, 0, 100), "page_size", "must be greater than zero and lower than 100")
+	v.Check(validator.Between(f.Page, 0, 10_000_000), "page", "must be greater or equal to 0 and lower or equal to 10 million")
+	v.Check(validator.Between(f.PageSize, 0, 100), "page_size", "must be greater or equal to 0 and lower or equal to 100")
 
 	// Check that the sort parameter matches a value in the safelist
 	v.Check(validator.In(f.Sort, f.SortSafelist...), "sort", "invalid sort value")
