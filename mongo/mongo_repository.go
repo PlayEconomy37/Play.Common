@@ -76,7 +76,7 @@ func (repo MongoRepository[T]) GetAll(
 	findOptions := options.Find()
 	findOptions.SetSkip(int64(findOpts.Offset()))
 	findOptions.SetLimit(int64(findOpts.Limit()))
-	findOptions.SetSort(bson.M{findOpts.SortColumn(): findOpts.SortDirection(), "_id": 1}) // We include a secondary sort on the id to ensure a consistent ordering
+	findOptions.SetSort(bson.D{{Key: findOpts.SortColumn(), Value: findOpts.SortDirection()}, {Key: "_id", Value: 1}}) // We include a secondary sort on the id to ensure a consistent ordering
 
 	var items []T
 
