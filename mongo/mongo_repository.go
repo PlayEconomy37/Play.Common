@@ -93,7 +93,7 @@ func (repo MongoRepository[T]) GetAll(
 	}
 
 	if maxPrice != DEFAULT_PRICE {
-		filter["price"] = bson.M{"$gte": maxPrice}
+		filter["price"] = bson.M{"$lte": maxPrice}
 	}
 
 	var items []T
