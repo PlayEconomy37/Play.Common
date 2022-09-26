@@ -66,35 +66,18 @@ func (repo MongoRepository[T]) GetById(ctx context.Context, id primitive.ObjectI
 // Retrieves all documents from the collection
 func (repo MongoRepository[T]) GetAll(
 	ctx context.Context,
-	name string,
-	minPrice float64,
-	maxPrice float64,
-	filteringOpts filters.Filters,
+	filter primitive.M,
+	findOpts filters.Filters,
 ) ([]T, filters.Metadata, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
 	// Find options
 	findOptions := options.Find()
-	findOptions.SetSkip(int64(filteringOpts.Offset()))
-	findOptions.SetLimit(int64(filteringOpts.Limit()))
-	findOptions.SetSort(bson.M{filteringOpts.SortColumn(): filteringOpts.SortDirection()})
+	findOptions.SetSkip(int64(findOpts.Offset()))
+	findOptions.SetLimit(int64(findOpts.Limit()))
+	findOptions.SetSort(bson.M{findOpts.SortColumn(): findOpts.SortDirection()})
 	findOptions.SetSort(bson.M{"_id": 1}) // We include a secondary sort on the id to ensure a consistent ordering
-
-	// Set filters
-	filter := bson.M{}
-
-	if name != "" {
-		filter["$text"] = bson.M{"$search": name}
-	}
-
-	if minPrice != DEFAULT_PRICE {
-		filter["price"] = bson.M{"$gte": minPrice}
-	}
-
-	if maxPrice != DEFAULT_PRICE {
-		filter["price"] = bson.M{"$lte": maxPrice}
-	}
 
 	var items []T
 
@@ -128,7 +111,7 @@ func (repo MongoRepository[T]) GetAll(
 
 	// Generate a Metadata struct, passing in the total document count and pagination
 	// parameters from the client
-	metadata := filters.CalculateMetadata(int(count), filteringOpts.Page, filteringOpts.PageSize)
+	metadata := filters.CalculateMetadata(int(count), findOpts.Page, findOpts.PageSize)
 
 	return items, metadata, nil
 }
