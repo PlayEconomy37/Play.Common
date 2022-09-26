@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"log"
 	"net/http"
@@ -11,7 +12,21 @@ import (
 	"time"
 )
 
-func (app *App) Serve(router http.Handler) error {
+func (app *App) Serve(router http.Handler, certFile, keyFile string) error {
+	// Initialize a tls.Config struct to hold the non-default TLS settings we want
+	// the server to use
+	tlsConfig := &tls.Config{
+		// Go’s favored cipher suites are given preference and we help increase the likelihood that
+		// a strong cipher suite which also supports forward secrecy is used
+		PreferServerCipherSuites: true,
+
+		// Specify which elliptic curves should be given preference during the TLS handshake.
+		// Go supports a few elliptic curves, but as of Go 1.11 only tls.CurveP256 and tls.X25519
+		// have assembly implementations. The others are very CPU intensive, so omitting them helps
+		// ensure that our server will remain performant under heavy loads.
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
 	// Declare a HTTP server
 	server := &http.Server{
 		Addr:         app.Config.Address,
@@ -20,6 +35,7 @@ func (app *App) Serve(router http.Handler) error {
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
+		TLSConfig:    tlsConfig,
 	}
 
 	// Create a shutdownError channel. We will use this to receive any errors returned
@@ -73,7 +89,7 @@ func (app *App) Serve(router http.Handler) error {
 	// return a http.ErrServerClosed error. So if we see this error, it is actually a
 	// good thing and an indication that the graceful shutdown has started. So we check
 	// specifically for this, only returning the error if it is NOT http.ErrServerClosed.
-	err := server.ListenAndServe()
+	err := server.ListenAndServeTLS(certFile, keyFile)
 	if !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}

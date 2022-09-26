@@ -9,6 +9,7 @@ import (
 	"github.com/felixge/httpsnoop"
 )
 
+// Make sure that any panics are handled properly in our application
 func (app *App) RecoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -31,6 +32,7 @@ func (app *App) RecoverPanic(next http.Handler) http.Handler {
 	})
 }
 
+// Set prometheus metrics for every request
 func (app *App) Metrics(appName string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		// Create Prometheus metrics
@@ -51,4 +53,29 @@ func (app *App) Metrics(appName string) func(next http.Handler) http.Handler {
 			prometheusMetrics.TotalProcessingTimeCounter.WithLabelValues(r.Method, r.URL.Path).Observe(float64(metrics.Duration.Microseconds()))
 		})
 	}
+}
+
+// Instruct the user’s web browser to implement some additional security measures
+// to help prevent XSS and Clickjacking attacks
+func (app *App) SecureHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		w.Header().Set("X-Frame-Options", "deny")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *App) LogRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		properties := map[string]string{
+			"ipAddress": r.RemoteAddr,
+			"protocol":  r.Proto,
+			"method":    r.Method,
+			"url":       r.URL.RequestURI(),
+		}
+
+		app.Logger.Info(fmt.Sprintf("%s - %s %s %s", properties["ipAddress"], properties["protocol"], properties["method"], properties["url"]), properties)
+		next.ServeHTTP(w, r)
+	})
 }
