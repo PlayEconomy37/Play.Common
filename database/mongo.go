@@ -17,11 +17,11 @@ func NewClient(cfg *configuration.Config, dsn string) (*mongo.Client, error) {
 
 	// MongoDB connection options
 	maxOpenConns := uint64(cfg.Db.MaxOpenConns)
-	maxIdleTimeMS := time.Duration(cfg.Db.MaxIdleTimeMS)
+	maxIdleTime := time.Duration(cfg.Db.MaxIdleTimeMS)
 	opts := options.Client()
 	opts.Monitor = otelmongo.NewMonitor() // Opentelemetry tracing
 	opts.MaxPoolSize = &maxOpenConns
-	opts.MaxConnIdleTime = &maxIdleTimeMS
+	opts.MaxConnIdleTime = &maxIdleTime
 	opts.ApplyURI(dsn)
 
 	// Connect to MongoDB
