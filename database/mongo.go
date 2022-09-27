@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 )
 
-func NewClient(cfg *configuration.Config, dsn string) (*mongo.Client, error) {
+func NewMongoClient(cfg configuration.Config, dsn string) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
