@@ -1,8 +1,6 @@
 package configuration
 
 import (
-	"strings"
-
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/providers/env"
@@ -10,12 +8,14 @@ import (
 )
 
 type Config struct {
-	Address     string `koanf:"address"`
-	ServiceName string `koanf:"serviceName"`
-	Authority   string `koanf:"authority"`
+	Address     string `koanf:"Address"`
+	ServiceName string `koanf:"ServiceName"`
 	Db          struct {
-		Dsn string `koanf:"dsn"`
-	} `koanf:"db"`
+		Dsn           string `koanf:"Dsn"`
+		MaxIdleTimeMS int    `koanf:"MaxIdleTimeMs"`
+		MaxOpenConns  int    `koanf:"MaxOpenConns"`
+		MaxIdleConns  int    `koanf:"MaxIdleConns"`
+	} `koanf:"Db"`
 }
 
 // Reads configuration from file and/or environment variables
@@ -33,16 +33,9 @@ func LoadConfig(filePath string) (Config, error) {
 	// We lowercase the key, replace `_` with `.` and strip the APP_ prefix.
 	configReader.Load(
 		env.Provider(
-			"APP_",
-			".",
-			func(s string) string {
-				return strings.Replace(
-					strings.ToLower(strings.TrimPrefix(s, "APP_")),
-					"_",
-					".",
-					-1,
-				)
-			},
+			"",
+			"__",
+			nil,
 		),
 		nil,
 	)

@@ -1,24 +1,27 @@
-package mongo
+package database
 
 import (
 	"context"
 	"log"
 	"time"
 
+	"github.com/PlayEconomy37/Play.Common/configuration"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 )
 
-const defaultTimeout = 3 * time.Second
-
-func NewClient(dsn string) (*mongo.Client, error) {
+func NewClient(cfg *configuration.Config, dsn string) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	// MongoDB connection options
+	maxOpenConns := uint64(cfg.Db.MaxOpenConns)
+	maxIdleTimeMS := time.Duration(cfg.Db.MaxIdleTimeMS)
 	opts := options.Client()
 	opts.Monitor = otelmongo.NewMonitor() // Opentelemetry tracing
+	opts.MaxPoolSize = &maxOpenConns
+	opts.MaxConnIdleTime = &maxIdleTimeMS
 	opts.ApplyURI(dsn)
 
 	// Connect to MongoDB

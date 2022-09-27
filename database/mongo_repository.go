@@ -1,4 +1,4 @@
-package mongo
+package database
 
 import (
 	"context"
@@ -26,12 +26,12 @@ var (
 	ErrEditConflict = errors.New("edit conflict")
 )
 
-type MongoRepository[T types.Entity[T]] struct {
+type MongoRepository[T types.MongoEntity[T]] struct {
 	collection *mongo.Collection
 }
 
 // Creates a new mongoDB repository
-func NewRepository[T types.Entity[T]](client *mongo.Client, database, collection string) types.Repository[T] {
+func NewMongoRepository[T types.MongoEntity[T]](client *mongo.Client, database, collection string) types.MongoRepository[T] {
 	return &MongoRepository[T]{
 		collection: client.Database(database).Collection(collection),
 	}
@@ -116,11 +116,11 @@ func (repo MongoRepository[T]) GetAll(
 }
 
 // Inserts a new document in the collection
-func (repo MongoRepository[T]) Create(ctx context.Context, entity T) (primitive.ObjectID, error) {
+func (repo MongoRepository[T]) Create(ctx context.Context, MongoEntity T) (primitive.ObjectID, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	result, err := repo.collection.InsertOne(ctx, entity)
+	result, err := repo.collection.InsertOne(ctx, MongoEntity)
 	if err != nil {
 		return primitive.NilObjectID, err
 	}
@@ -129,14 +129,14 @@ func (repo MongoRepository[T]) Create(ctx context.Context, entity T) (primitive.
 }
 
 // Updates a specific document from the collection
-func (repo MongoRepository[T]) Update(ctx context.Context, entity T) error {
+func (repo MongoRepository[T]) Update(ctx context.Context, MongoEntity T) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
 	result, err := repo.collection.UpdateOne(
 		ctx,
-		bson.M{"_id": entity.GetID(), "version": entity.GetVersion()},
-		bson.M{"$set": entity.SetVersion(entity.GetVersion() + 1)},
+		bson.M{"_id": MongoEntity.GetID(), "version": MongoEntity.GetVersion()},
+		bson.M{"$set": MongoEntity.SetVersion(MongoEntity.GetVersion() + 1)},
 	)
 	if err != nil {
 		return err
