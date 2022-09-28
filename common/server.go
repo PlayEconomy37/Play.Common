@@ -98,7 +98,7 @@ func (app *App) Serve(router http.Handler, certFile, keyFile string) error {
 	// return a http.ErrServerClosed error. So if we see this error, it is actually a
 	// good thing and an indication that the graceful shutdown has started. So we check
 	// specifically for this, only returning the error if it is NOT http.ErrServerClosed.
-	err := server.ListenAndServeTLS(certFile, keyFile)
+	err := server.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}

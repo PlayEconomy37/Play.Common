@@ -34,7 +34,7 @@ type SqlStatsCollector struct {
 }
 
 // NewSqlStatsCollector creates a new StatsCollector.
-func NewSqmStatsCollector(dbName string, sg StatsGetter) *SqlStatsCollector {
+func NewSqlStatsCollector(dbName string, sg StatsGetter) *SqlStatsCollector {
 	labels := prometheus.Labels{"db_name": dbName}
 	return &SqlStatsCollector{
 		sg: sg,
