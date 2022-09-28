@@ -10,11 +10,11 @@ import (
 )
 
 type Mailer struct {
-	client *mail.SMTPClient
+	server *mail.SMTPServer
 	sender string
 }
 
-func New(host string, port int, username, password, sender string) (Mailer, error) {
+func New(host string, port int, username, password, sender string) Mailer {
 	// Create email server
 	server := mail.NewSMTPClient()
 	server.Host = host
@@ -25,19 +25,19 @@ func New(host string, port int, username, password, sender string) (Mailer, erro
 	server.ConnectTimeout = 10 * time.Second
 	server.SendTimeout = 10 * time.Second
 
-	// Connect to mail server
-	client, err := server.Connect()
-	if err != nil {
-		return Mailer{}, err
-	}
-
-	return Mailer{client: client, sender: sender}, err
+	return Mailer{server: server, sender: sender}
 }
 
 // Define a Send() method on the Mailer type. This takes the recipient email address
 // as the first parameter, the name of the file containing the templates, and any
 // dynamic data for the templates as an any parameter.
 func (m Mailer) Send(recipient string, fileSystem embed.FS, templateFile string, data any) error {
+	// Connect to mail server
+	client, err := m.server.Connect()
+	if err != nil {
+		return err
+	}
+
 	// Use the `ParseFS()` method to parse the required template file from the embedded
 	// file system
 	tmpl, err := template.New("email").ParseFS(fileSystem, "emails/"+templateFile)
@@ -79,7 +79,7 @@ func (m Mailer) Send(recipient string, fileSystem embed.FS, templateFile string,
 	// Try sending the email up to three times before aborting and returning the final
 	// error. We sleep for 500 milliseconds between each attempt.
 	for i := 1; i <= 3; i++ {
-		err = email.Send(m.client)
+		err = email.Send(client)
 		// If everything worked, return nil
 		if nil == err {
 			return nil
