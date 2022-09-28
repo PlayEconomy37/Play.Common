@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (app *App) Serve(router http.Handler, certFile, keyFile string) error {
+func (app *App) Serve(router http.Handler) error {
 	// Initialize a tls.Config struct to hold the non-default TLS settings we want
 	// the server to use
 	tlsConfig := &tls.Config{
