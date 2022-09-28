@@ -16,9 +16,16 @@ type Config struct {
 		MaxOpenConns  int    `koanf:"MaxOpenConns"`
 		MaxIdleConns  int    `koanf:"MaxIdleConns"`
 	} `koanf:"Db"`
+	Smtp struct {
+		Host     string `koanf:"Host"`
+		Port     int    `koanf:"Port"`
+		Username string `koanf:"Username"`
+		Password string `koanf:"Password"`
+		Sender   string `koanf:"Sender"`
+	} `koanf:"Smtp"`
 }
 
-// Reads configuration from file and/or environment variables
+// Reads configuration from file and environment variables
 func LoadConfig(filePath string) (Config, error) {
 	var config Config
 

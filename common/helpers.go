@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -229,4 +230,28 @@ func (app *App) ReadFloatFromQueryString(queryString url.Values, key string, def
 	}
 
 	return value
+}
+
+// Helper function which runs function in a separate go routine and makes sure that we
+// recover any panic that happens in the go routine.
+// We pass in the context for opentelemetry tracing
+func (app *App) Background(ctx context.Context, fn func(ctx context.Context)) {
+	// Increment the WaitGroup counter
+	app.WaitGroup.Add(1)
+
+	// Launch a background goroutine
+	go func() {
+		// Use defer to decrement the WaitGroup counter before the goroutine returns.
+		defer app.WaitGroup.Done()
+
+		// Recover any panic
+		defer func() {
+			if err := recover(); err != nil {
+				app.Logger.Error(fmt.Errorf("%s", err), nil)
+			}
+		}()
+
+		// Execute the arbitrary function that we passed as the parameter
+		fn(ctx)
+	}()
 }
