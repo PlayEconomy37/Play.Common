@@ -22,8 +22,8 @@ func New(host string, port int, username, password, sender string) (Mailer, erro
 	server.Username = username
 	server.Password = password
 	server.KeepAlive = false
-	server.ConnectTimeout = 5 * time.Second
-	server.SendTimeout = 5 * time.Second
+	server.ConnectTimeout = 10 * time.Second
+	server.SendTimeout = 10 * time.Second
 
 	// Connect to mail server
 	client, err := server.Connect()
