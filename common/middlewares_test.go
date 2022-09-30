@@ -128,7 +128,11 @@ func TestLogger(t *testing.T) {
 	go func() {
 		scanner := bufio.NewScanner(rFile)
 
-		for scanner.Scan() {
+		for {
+			if !scanner.Scan() {
+				break
+			}
+
 			buf.WriteString(scanner.Text())
 		}
 	}()
