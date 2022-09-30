@@ -128,11 +128,7 @@ func TestLogger(t *testing.T) {
 	go func() {
 		scanner := bufio.NewScanner(rFile)
 
-		for {
-			if !scanner.Scan() {
-				break
-			}
-
+		for scanner.Scan() {
 			buf.WriteString(scanner.Text())
 		}
 	}()
@@ -180,6 +176,8 @@ func TestLogger(t *testing.T) {
 
 	// Reset output
 	w.Close()
+
+	t.Log(buf)
 
 	if buf.Len() == 0 {
 		t.Error("No information logged to STDOUT")
