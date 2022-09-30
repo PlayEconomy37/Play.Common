@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Address     string `koanf:"Address"`
 	ServiceName string `koanf:"ServiceName"`
+	Authority   string `koanf:"Authority"`
 	Db          struct {
 		Dsn           string `koanf:"Dsn"`
 		MaxIdleTimeMS int    `koanf:"MaxIdleTimeMs"`
