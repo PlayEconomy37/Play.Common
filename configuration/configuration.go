@@ -25,6 +25,15 @@ type Config struct {
 		Password string `koanf:"Password"`
 		Sender   string `koanf:"Sender"`
 	} `koanf:"Smtp"`
+	RabbitMQ struct {
+		Host         string `koanf:"Host"`
+		Port         int    `koanf:"Port"`
+		User         string `koanf:"User"`
+		Password     string `koanf:"Password"`
+		ExchangeName string `koanf:"ExchangeName"`
+		BindingKey   string `koanf:"BindingKey"`
+		ConsumerTag  string `koanf:"ConsumerTag"`
+	} `koanf:"RabbitMQ"`
 }
 
 // LoadConfig reads configuration from a given file and from environment variables

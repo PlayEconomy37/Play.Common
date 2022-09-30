@@ -12,7 +12,7 @@ import (
 )
 
 // NewMongoClient creates a new mongo client with given configuration
-func NewMongoClient(cfg configuration.Config, dsn string) (*mongo.Client, error) {
+func NewMongoClient(cfg configuration.Config) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
@@ -23,7 +23,7 @@ func NewMongoClient(cfg configuration.Config, dsn string) (*mongo.Client, error)
 	opts.Monitor = otelmongo.NewMonitor() // Opentelemetry tracing
 	opts.MaxPoolSize = &maxOpenConns
 	opts.MaxConnIdleTime = &maxIdleTime
-	opts.ApplyURI(dsn)
+	opts.ApplyURI(cfg.DB.Dsn)
 
 	// Connect to MongoDB
 	mongoClient, err := mongo.Connect(ctx, opts)
