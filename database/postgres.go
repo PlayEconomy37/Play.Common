@@ -10,9 +10,9 @@ import (
 	"github.com/PlayEconomy37/Play.Common/configuration"
 	"github.com/XSAM/otelsql"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres" // Connect migrate tool with the pq driver
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // Connect pq driver to the migrate tool
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 )
 

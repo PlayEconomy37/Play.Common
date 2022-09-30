@@ -7,6 +7,7 @@ import (
 	"github.com/knadh/koanf/providers/file"
 )
 
+// Config is a struct that holds the application configuration
 type Config struct {
 	Address     string `koanf:"Address"`
 	ServiceName string `koanf:"ServiceName"`

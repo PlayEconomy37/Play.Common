@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// Serve creates and starts an HTTP server
 func (app *App) Serve(router http.Handler) error {
 	// Initialize a tls.Config struct to hold the non-default TLS settings we want
 	// the server to use
