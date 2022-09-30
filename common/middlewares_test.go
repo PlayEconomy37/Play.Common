@@ -177,9 +177,6 @@ func TestLogger(t *testing.T) {
 	// Reset output
 	w.Close()
 
-	// Test output
-	t.Log(buf)
-
 	if buf.Len() == 0 {
 		t.Error("No information logged to STDOUT")
 	}
