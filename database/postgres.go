@@ -16,9 +16,10 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 )
 
-func NewPostgresDB(cfg configuration.Config, dsn string, automigrate bool, embeddedFiles embed.FS) (*sql.DB, error) {
+// NewPostgresDB creates a Postgres connection pool using given configuration
+func NewPostgresDB(cfg configuration.Config, automigrate bool, embeddedFiles embed.FS) (*sql.DB, error) {
 	// Instrument database with Opentelemetry
-	db, err := otelsql.Open("postgres", dsn, otelsql.WithAttributes(
+	db, err := otelsql.Open("postgres", cfg.DB.Dsn, otelsql.WithAttributes(
 		semconv.DBSystemPostgreSQL,
 	))
 	if err != nil {
@@ -34,9 +35,9 @@ func NewPostgresDB(cfg configuration.Config, dsn string, automigrate bool, embed
 	}
 
 	// Set database connection pool configuration
-	db.SetMaxOpenConns(cfg.Db.MaxOpenConns)
-	db.SetMaxIdleConns(cfg.Db.MaxIdleConns)
-	db.SetConnMaxIdleTime(time.Duration(cfg.Db.MaxIdleTimeMS) * time.Millisecond)
+	db.SetMaxOpenConns(cfg.DB.MaxOpenConns)
+	db.SetMaxIdleConns(cfg.DB.MaxIdleConns)
+	db.SetConnMaxIdleTime(time.Duration(cfg.DB.MaxIdleTimeMS) * time.Millisecond)
 
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
@@ -52,7 +53,7 @@ func NewPostgresDB(cfg configuration.Config, dsn string, automigrate bool, embed
 			return nil, err
 		}
 
-		migrator, err := migrate.NewWithSourceInstance("iofs", iofsDriver, dsn)
+		migrator, err := migrate.NewWithSourceInstance("iofs", iofsDriver, cfg.DB.Dsn)
 		if err != nil {
 			return nil, err
 		}

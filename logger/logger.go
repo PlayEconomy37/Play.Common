@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// Define a Level type to represent the severity level for a log entry
+// Level is a custom type that represents the severity level for a log entry
 type Level int8
 
 // Initialize constants which represent a specific severity level. We use the iota
@@ -22,7 +22,7 @@ const (
 	LevelOff                  // Has the value 4
 )
 
-// Return a human-friendly string for the severity level
+// String returns a human-friendly string for the severity level
 func (l Level) String() string {
 	switch l {
 	case LevelInfo:
@@ -38,8 +38,8 @@ func (l Level) String() string {
 	}
 }
 
-// Define a custom Logger type. This holds the output destination that the log entries
-// will be written to, the minimum severity level that log entries will be written for,
+// Logger is a struct that defines a custom Logger type. This holds the output destination that the
+// log entries will be written to, the minimum severity level that log entries will be written for,
 // plus a mutex for coordinating the writes.
 type Logger struct {
 	output   io.Writer
@@ -47,7 +47,7 @@ type Logger struct {
 	mutex    sync.Mutex
 }
 
-// Return a new Logger instance which writes log entries at or above a minimum severity
+// New returns a new Logger instance which writes log entries at or above a minimum severity
 // level to a specific output destination
 func New(output io.Writer, minLevel Level) *Logger {
 	return &Logger{
@@ -56,27 +56,36 @@ func New(output io.Writer, minLevel Level) *Logger {
 	}
 }
 
-// Declare some helper methods for writing log entries at the different levels. Notice
-// that these all accept a map as the second parameter which can contain any arbitrary
+// Info is a helper method for writing log entries at the INFO level. Notice
+// that it accepts a map as the second parameter which can contain any arbitrary
 // 'properties' that you want to appear in the log entry.
 func (l *Logger) Info(message string, properties map[string]string) {
 	l.print(LevelInfo, message, properties)
 }
 
+// Warning is a helper method for writing log entries at the WARNING level. Notice
+// that it accepts a map as the second parameter which can contain any arbitrary
+// 'properties' that you want to appear in the log entry.
 func (l *Logger) Warning(message string, properties map[string]string) {
 	l.print(LevelWarning, message, properties)
 }
 
+// Error is a helper method for writing log entries at the ERROR level. Notice
+// that it accepts a map as the second parameter which can contain any arbitrary
+// 'properties' that you want to appear in the log entry.
 func (l *Logger) Error(err error, properties map[string]string) {
 	l.print(LevelError, err.Error(), properties)
 }
 
+// Fatal is a helper method for writing log entries at the FATAL level. Notice
+// that it accepts a map as the second parameter which can contain any arbitrary
+// 'properties' that you want to appear in the log entry.
 func (l *Logger) Fatal(err error, properties map[string]string) {
 	l.print(LevelError, err.Error(), properties)
 	os.Exit(1)
 }
 
-// Internal method for writing the log entry
+// print is an internal method for writing the log entry
 func (l *Logger) print(level Level, message string, properties map[string]string) (int, error) {
 	// If the severity level of the log entry is below the minimum severity for the
 	// logger, then return with no further action
@@ -120,7 +129,7 @@ func (l *Logger) print(level Level, message string, properties map[string]string
 	return l.output.Write(append(log, '\n'))
 }
 
-// We also implement a Write() method on our Logger type so that it satisfies the
+// Write is implemented on our Logger type so that it satisfies the
 // io.Writer interface. This writes a log entry at the ERROR level with no additional
 // properties.
 func (l *Logger) Write(message []byte) (n int, err error) {

@@ -6,7 +6,7 @@ import (
 	"github.com/PlayEconomy37/Play.Common/validator"
 )
 
-// Holds filtering parameters
+// Filters is a truct that holds filtering parameters
 type Filters struct {
 	Page         int
 	PageSize     int
@@ -14,7 +14,7 @@ type Filters struct {
 	SortSafelist []string // Supported sort column values
 }
 
-// Validate filters received as query parameters
+// ValidateFilters is a helper function that validates filters received as query parameters
 func ValidateFilters(v *validator.Validator, f Filters) {
 	// Check that the page and page_size parameters contain sensible values
 	v.Check(validator.Between(f.Page, 0, 10_000_000), "page", "must be greater or equal to 0 and lower or equal to 10 million")
@@ -24,9 +24,8 @@ func ValidateFilters(v *validator.Validator, f Filters) {
 	v.Check(validator.In(f.Sort, f.SortSafelist...), "sort", "invalid sort value")
 }
 
-// Check that the client-provided `Sort` field matches one of the entries in our safelist
-// and if it does, extract the column name from the `Sort` field by stripping the leading
-// hyphen character (if one exists)
+// SortColumn is a helper method that checks if the client-provided `Sort` field matches one of the entries in our safelist
+// and if it does, extract the column name from the `Sort` field by stripping the leading hyphen character (if one exists)
 func (f Filters) SortColumn() string {
 	for _, safeValue := range f.SortSafelist {
 		if f.Sort == safeValue {
@@ -39,8 +38,8 @@ func (f Filters) SortColumn() string {
 	panic("unsafe sort parameter: " + f.Sort)
 }
 
-// Return the sort direction ("ASC" or "DESC") depending on the prefix character of the
-// Sort field
+// SortDirection is a helper method that returns the sort direction ("ASC" or "DESC")
+// depending on the prefix character of the `Sort` field
 func (f Filters) SortDirection() int8 {
 	// Descending order
 	if strings.HasPrefix(f.Sort, "-") {
@@ -51,12 +50,13 @@ func (f Filters) SortDirection() int8 {
 	return 1
 }
 
-// Returns the number of records to be returned in the query
+// Limit is a helper method returns the number of records to be returned in the query
 func (f Filters) Limit() int {
 	return f.PageSize
 }
 
-// Returns the number of rows to skip before starting to return records from the query
+// Offset is a helper method returns the number of rows to skip before starting to
+// return records from the query
 func (f Filters) Offset() int {
 	return (f.Page - 1) * f.PageSize
 }

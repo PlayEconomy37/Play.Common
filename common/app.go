@@ -8,7 +8,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Common application struct for microservices
+// App is a Common application struct for microservices
 type App struct {
 	Config    configuration.Config
 	Logger    *logger.Logger

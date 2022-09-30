@@ -2,7 +2,7 @@ package filters
 
 import "math"
 
-// Holds the pagination metadata
+// Metadata is a struct that holds the pagination metadata
 type Metadata struct {
 	CurrentPage  int `json:"current_page,omitempty"`
 	PageSize     int `json:"page_size,omitempty"`
@@ -11,7 +11,7 @@ type Metadata struct {
 	TotalRecords int `json:"total_records,omitempty"`
 }
 
-// The calculateMetadata() function calculates the appropriate pagination metadata
+// CalculateMetadata calculates the appropriate pagination metadata
 // values given the total number of records, current page, and page size values. Note
 // that the last page value is calculated using the math.Ceil() function, which rounds
 // up a float to the nearest integer. So, for example, if there were 12 records in total

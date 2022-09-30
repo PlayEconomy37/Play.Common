@@ -9,11 +9,13 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 
+// Mailer is a struct that holds an SMTP server and a sender email address
 type Mailer struct {
 	server *mail.SMTPServer
 	sender string
 }
 
+// New crates a new Mailer instance
 func New(host string, port int, username, password, sender string) Mailer {
 	// Create email server
 	server := mail.NewSMTPClient()
@@ -28,9 +30,8 @@ func New(host string, port int, username, password, sender string) Mailer {
 	return Mailer{server: server, sender: sender}
 }
 
-// Define a Send() method on the Mailer type. This takes the recipient email address
-// as the first parameter, the name of the file containing the templates, and any
-// dynamic data for the templates as an any parameter.
+// Send takes the recipient email address as the first parameter, the name of the file
+// containing the templates, and any dynamic data for the templates as an any parameter.
 func (m Mailer) Send(recipient string, fileSystem embed.FS, templateFile string, data any) error {
 	// Connect to mail server
 	client, err := m.server.Connect()

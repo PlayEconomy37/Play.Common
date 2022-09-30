@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-// Acts as the holding structure for any dynamic data that we want to pass to our HTML templates
+// TemplateData is a struct that holds any dynamic data that we want to pass to our HTML templates.
 // This should be defined by the application using the templates and not here.
 type TemplateData struct {
 	CurrentYear int
 }
 
-// Create a new template cache
+// NewTemplateCache creates a new template cache for our HTML pages
 func NewTemplateCache(dir string, functions template.FuncMap) (map[string]*template.Template, error) {
 	// Initialize a new map to act as the cache
 	cache := map[string]*template.Template{}
@@ -64,7 +64,8 @@ func NewTemplateCache(dir string, functions template.FuncMap) (map[string]*templ
 	return cache, nil
 }
 
-// Adds default data to a template
+// AddDefaultData adds default data to a TemplateData struct.
+// This data is shared between all templates.
 // This should be defined by the application using the templates and not here.
 func (app *App) AddDefaultData(td *TemplateData, r *http.Request) *TemplateData {
 	if td == nil {
@@ -76,7 +77,7 @@ func (app *App) AddDefaultData(td *TemplateData, r *http.Request) *TemplateData 
 	return td
 }
 
-// Renders the specified template
+// Render renders the specified template
 func (app *App) Render(w http.ResponseWriter, r *http.Request, templateCache map[string]*template.Template, name string, td *TemplateData) {
 	// Retrieve the appropriate template set from the cache based on the page name
 	// (like 'home.page.tmpl')

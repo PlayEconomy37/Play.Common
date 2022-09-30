@@ -17,7 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Helper for sending JSON responses. This takes the destination
+// WriteJSON is a helper function for sending JSON responses. This takes the destination
 // http.ResponseWriter, the HTTP status code to send, the data to encode to JSON and a
 // header map containing any additional HTTP headers we want to include in the response.
 func (app *App) WriteJSON(w http.ResponseWriter, status int, data types.Envelope, headers http.Header) error {
@@ -44,7 +44,7 @@ func (app *App) WriteJSON(w http.ResponseWriter, status int, data types.Envelope
 	return nil
 }
 
-// Helper for reading JSON data from HTTP request to specified target
+// ReadJSON is a helper function for reading JSON data from HTTP request to the specified target
 func (app *App) ReadJSON(w http.ResponseWriter, r *http.Request, target interface{}) error {
 	// Use http.MaxBytesReader() to limit the size of the request body to 1MB
 	maxBytes := 1_048_576
@@ -124,8 +124,8 @@ func (app *App) ReadJSON(w http.ResponseWriter, r *http.Request, target interfac
 	return nil
 }
 
-// Retrieve the URL parameter `id` from the current request context, then convert it to an integer
-func (app *App) ReadIdParam(r *http.Request) (int64, error) {
+// ReadIDParam retrieves the URL parameter `id` from the current request context, then converts it to an integer
+func (app *App) ReadIDParam(r *http.Request) (int64, error) {
 	// Extract URL parameters from request context
 	params := chi.URLParamFromCtx(r.Context(), "id")
 
@@ -139,8 +139,8 @@ func (app *App) ReadIdParam(r *http.Request) (int64, error) {
 	return id, nil
 }
 
-// Retrieve the URL parameter `id` from the current request context, then convert it to an ObjectID
-func (app *App) ReadObjectIdParam(r *http.Request) (primitive.ObjectID, error) {
+// ReadObjectIDParam retrieves the URL parameter `id` from the current request context, then converts it to an ObjectID
+func (app *App) ReadObjectIDParam(r *http.Request) (primitive.ObjectID, error) {
 	// Extract URL parameters from request context
 	params := chi.URLParamFromCtx(r.Context(), "id")
 
@@ -153,8 +153,8 @@ func (app *App) ReadObjectIdParam(r *http.Request) (primitive.ObjectID, error) {
 	return objectID, nil
 }
 
-// The ReadStringFromQueryString() helper returns a string value from the query string, or the provided
-// default value if no matching key could be found
+// ReadStringFromQueryString is a helper function that returns a string value from the query string,
+// or the provided default value if no matching key could be found
 func (app *App) ReadStringFromQueryString(queryString url.Values, key string, defaultValue string) string {
 	// Extract the value for a given key from the query string. If no key exists this
 	// will return the empty string ""
@@ -168,9 +168,8 @@ func (app *App) ReadStringFromQueryString(queryString url.Values, key string, de
 	return value
 }
 
-// The ReadCsvFromQueryString() helper reads a string value from the query string and then splits it
-// into a slice on the comma character. If no matching key could be found, it returns
-// the provided default value.
+// ReadCsvFromQueryString is a helper function that reads a string value from the query string and then splits it
+// into a slice on the comma character. If no matching key could be found, it returns the provided default value.
 func (app *App) ReadCsvFromQueryString(queryString url.Values, key string, defaultValue []string) []string {
 	// Extract the value from the query string
 	csv := queryString.Get(key)
@@ -184,10 +183,9 @@ func (app *App) ReadCsvFromQueryString(queryString url.Values, key string, defau
 	return strings.Split(csv, ",")
 }
 
-// The ReadIntFromQueryString() helper reads a string value from the query string and converts it to an
-// integer before returning. If no matching key could be found it returns the provided
-// default value. If the value couldn't be converted to an integer, then we record an
-// error message in the provided Validator instance.
+// ReadIntFromQueryString is a helper function that reads a string value from the query string and converts it to an
+// integer before returning. If no matching key could be found it returns the provided default value.
+// If the value couldn't be converted to an integer, then we record an error message in the provided Validator instance.
 func (app *App) ReadIntFromQueryString(queryString url.Values, key string, defaultValue int, v *validator.Validator) int {
 	// Extract the value from the query string
 	str := queryString.Get(key)
@@ -208,10 +206,9 @@ func (app *App) ReadIntFromQueryString(queryString url.Values, key string, defau
 	return value
 }
 
-// The ReadFloatFromQueryString() helper reads a string value from the query string and converts it to a
-// float64 before returning. If no matching key could be found it returns the provided
-// default value. If the value couldn't be converted to a float64, then we record an
-// error message in the provided Validator instance.
+// ReadFloatFromQueryString is a helper function that reads a string value from the query string and converts it to a
+// float64 before returning. If no matching key could be found it returns the provided default value.
+// If the value couldn't be converted to a float64, then we record an error message in the provided Validator instance.
 func (app *App) ReadFloatFromQueryString(queryString url.Values, key string, defaultValue float64, v *validator.Validator) float64 {
 	// Extract the value from the query string
 	str := queryString.Get(key)
@@ -232,9 +229,9 @@ func (app *App) ReadFloatFromQueryString(queryString url.Values, key string, def
 	return value
 }
 
-// Helper function which runs function in a separate go routine and makes sure that we
+// Background is a helper function which runs a function in a separate go routine and makes sure that we
 // recover any panic that happens in the go routine.
-// We pass in the context for opentelemetry tracing
+// We pass in the context for opentelemetry tracing.
 func (app *App) Background(ctx context.Context, fn func(ctx context.Context)) {
 	// Increment the WaitGroup counter
 	app.WaitGroup.Add(1)

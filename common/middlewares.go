@@ -16,7 +16,7 @@ import (
 	"github.com/pascaldekloe/jwt"
 )
 
-// Make sure that any panics are handled properly in our application
+// RecoverPanic is a middleware used to make sure that any panics are handled properly in our application
 func (app *App) RecoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -39,11 +39,11 @@ func (app *App) RecoverPanic(next http.Handler) http.Handler {
 	})
 }
 
-// Set HTTP metrics for every request
-func (app *App) HttpMetrics(appName string) func(next http.Handler) http.Handler {
+// HTTPMetrics is a middleware used to set HTTP metrics for every HTTP request
+func (app *App) HTTPMetrics(appName string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		// Create HTTP  metrics
-		httpMetrics := opentelemetry.CreateHttpMetrics(appName)
+		httpMetrics := opentelemetry.CreateHTTPMetrics(appName)
 
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Increment the number of requests received by 1
@@ -62,8 +62,8 @@ func (app *App) HttpMetrics(appName string) func(next http.Handler) http.Handler
 	}
 }
 
-// Instruct the user’s web browser to implement some additional security measures
-// to help prevent XSS and Clickjacking attacks
+// SecureHeaders is a middleware used to instruct the user’s web browser to implement some
+// additional security measures to help prevent XSS and Clickjacking attacks
 func (app *App) SecureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
@@ -73,6 +73,7 @@ func (app *App) SecureHeaders(next http.Handler) http.Handler {
 	})
 }
 
+// LogRequest is a middleware used to log every HTTP request that comes to our application
 func (app *App) LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		properties := map[string]string{
@@ -92,11 +93,13 @@ type user interface {
 	ID() int64
 }
 
-// Repository interface used for authentication
+// AuthenticationRepository is an interface that defines the repository needed for authentication
 type AuthenticationRepository interface {
 	GetByID(ctx context.Context, userID int64) (user, error)
 }
 
+// Authenticate is a middleware used to authenticate a user before acessing a certain route.
+// It extracts a JWT access token from the Authorization header and validates it.
 func (app *App) Authenticate(repository AuthenticationRepository, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Add the "Vary: Authorization" header to the response. This indicates to any
@@ -183,12 +186,12 @@ func (app *App) Authenticate(repository AuthenticationRepository, next http.Hand
 	})
 }
 
-// Repository interface used for authorization
+// AuthorizationRepository is an interface that defines the repository needed for authorization
 type AuthorizationRepository interface {
 	GetAllForUser(ctx context.Context, userID int64) (permissions.Permissions, error)
 }
 
-// Check if user has the right permissions to access route
+// RequirePermission is a middleware used to check if user has the right permissions to access a certain route
 func (app *App) RequirePermission(repository AuthorizationRepository, code string, next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve the user from the request context

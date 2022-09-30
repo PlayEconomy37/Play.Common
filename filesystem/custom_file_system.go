@@ -5,12 +5,14 @@ import (
 	"path/filepath"
 )
 
+// CustomFileSystem is a struct that wraps an http.FileSystem to prevent directory listing attacks or redirects.
 // All requests for directories (with no index.html file) return a 404 Not Found response, instead of a directory listing or a redirect.
 // This works for requests both with and without a trailing slash.
 type CustomFileSystem struct {
 	Fs http.FileSystem
 }
 
+// Open is a method that wraps http.FileSystem's Open method.
 // We Stat() the requested file path and use the IsDir() method to check whether it's a directory or not.
 // If it is a directory, we then try to Open() any index.html file in it. If no index.html file exists,
 // then this will return a os.ErrNotExist error (which in turn we return and it will be transformed into

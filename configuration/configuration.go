@@ -11,13 +11,13 @@ type Config struct {
 	Address     string `koanf:"Address"`
 	ServiceName string `koanf:"ServiceName"`
 	Authority   string `koanf:"Authority"`
-	Db          struct {
+	DB          struct {
 		Dsn           string `koanf:"Dsn"`
 		MaxIdleTimeMS int    `koanf:"MaxIdleTimeMs"`
 		MaxOpenConns  int    `koanf:"MaxOpenConns"`
 		MaxIdleConns  int    `koanf:"MaxIdleConns"`
 	} `koanf:"Db"`
-	Smtp struct {
+	SMTP struct {
 		Host     string `koanf:"Host"`
 		Port     int    `koanf:"Port"`
 		Username string `koanf:"Username"`
@@ -26,7 +26,8 @@ type Config struct {
 	} `koanf:"Smtp"`
 }
 
-// Reads configuration from file and environment variables
+// LoadConfig reads configuration from a given file and from environment variables
+// (i.e. SMTP__Host=...).
 func LoadConfig(filePath string) (Config, error) {
 	var config Config
 
@@ -37,8 +38,7 @@ func LoadConfig(filePath string) (Config, error) {
 		return config, err
 	}
 
-	// Load environment variables and merge into the loaded config.
-	// We lowercase the key, replace `_` with `.` and strip the APP_ prefix.
+	// Load environment variables and merge into the loaded config
 	configReader.Load(
 		env.Provider(
 			"",

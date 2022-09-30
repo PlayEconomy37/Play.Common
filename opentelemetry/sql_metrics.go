@@ -12,13 +12,13 @@ const (
 )
 
 // StatsGetter is an interface that gets sql.DBStats.
-// It's implemented by e.g. *sql.DB or *sqlx.DB.
+// It's implemented by *sql.DB and *sqlx.DB.
 type StatsGetter interface {
 	Stats() sql.DBStats
 }
 
-// SqlStatsCollector implements the prometheus.Collector interface
-type SqlStatsCollector struct {
+// SQLStatsCollector is a struct that implements the prometheus.Collector interface
+type SQLStatsCollector struct {
 	sg StatsGetter
 
 	// Descriptions of exported metrics
@@ -33,10 +33,10 @@ type SqlStatsCollector struct {
 	closedMaxIdleTimeDesc *prometheus.Desc
 }
 
-// NewSqlStatsCollector creates a new StatsCollector.
-func NewSqlStatsCollector(dbName string, sg StatsGetter) *SqlStatsCollector {
+// NewSQLStatsCollector creates a new StatsCollector.
+func NewSQLStatsCollector(dbName string, sg StatsGetter) *SQLStatsCollector {
 	labels := prometheus.Labels{"db_name": dbName}
-	return &SqlStatsCollector{
+	return &SQLStatsCollector{
 		sg: sg,
 		maxOpenDesc: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, "max_open"),
@@ -96,7 +96,7 @@ func NewSqlStatsCollector(dbName string, sg StatsGetter) *SqlStatsCollector {
 }
 
 // Describe implements the prometheus.Collector interface.
-func (c SqlStatsCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c SQLStatsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.maxOpenDesc
 	ch <- c.openDesc
 	ch <- c.inUseDesc
@@ -109,7 +109,7 @@ func (c SqlStatsCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 // Collect implements the prometheus.Collector interface.
-func (c SqlStatsCollector) Collect(ch chan<- prometheus.Metric) {
+func (c SQLStatsCollector) Collect(ch chan<- prometheus.Metric) {
 	stats := c.sg.Stats()
 
 	ch <- prometheus.MustNewConstMetric(

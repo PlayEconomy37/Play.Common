@@ -11,13 +11,14 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 )
 
+// NewMongoClient creates a new mongo client with given configuration
 func NewMongoClient(cfg configuration.Config, dsn string) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	// MongoDB connection options
-	maxOpenConns := uint64(cfg.Db.MaxOpenConns)
-	maxIdleTime := time.Duration(cfg.Db.MaxIdleTimeMS)
+	maxOpenConns := uint64(cfg.DB.MaxOpenConns)
+	maxIdleTime := time.Duration(cfg.DB.MaxIdleTimeMS)
 	opts := options.Client()
 	opts.Monitor = otelmongo.NewMonitor() // Opentelemetry tracing
 	opts.MaxPoolSize = &maxOpenConns

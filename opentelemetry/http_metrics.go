@@ -7,13 +7,17 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-type HttpMetrics struct {
+// HTTPMetrics is a struct that holds some prometheus metrics
+// regarding HTTP requests
+type HTTPMetrics struct {
 	TotalRequestsCounter       *prometheus.CounterVec
 	TotalResponsesCounter      *prometheus.CounterVec
 	TotalProcessingTimeCounter *prometheus.HistogramVec
 }
 
-func CreateHttpMetrics(appName string) *HttpMetrics {
+// CreateHTTPMetrics creates counters and histograms used to keep
+// track of HTTP metrics in our application
+func CreateHTTPMetrics(appName string) *HTTPMetrics {
 	// Create total HTTP requests counter
 	totalRequestsCounter := promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: fmt.Sprintf("%s_total_requests_received", appName),
@@ -32,7 +36,7 @@ func CreateHttpMetrics(appName string) *HttpMetrics {
 		Help: "Total processing time of HTTP requests in microseconds",
 	}, []string{"method", "url"})
 
-	return &HttpMetrics{
+	return &HTTPMetrics{
 		TotalRequestsCounter:       totalRequestsCounter,
 		TotalResponsesCounter:      totalResponsesCounter,
 		TotalProcessingTimeCounter: totalProcessingTimeCounter,

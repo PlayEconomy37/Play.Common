@@ -12,33 +12,31 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Very specific value that is difficult to replicate
-const DEFAULT_PRICE = 51.43243344285539
-
 var (
-	// We'll return this error when trying to fetch an item
+	// ErrRecordNotFound is returned when trying to fetch an item
 	// that doesn't exist in our database
 	ErrRecordNotFound = errors.New("record not found")
 
-	// We'll return this error when trying to update an item
+	// ErrEditConflict is returned when trying to update an item
 	// in which the document version does not match
 	// (or the record has been deleted).
 	ErrEditConflict = errors.New("edit conflict")
 )
 
+// MongoRepository is a generic MongoDB repository struct
 type MongoRepository[T types.MongoEntity[T]] struct {
 	collection *mongo.Collection
 }
 
-// Creates a new mongoDB repository
+// NewMongoRepository creates a new MongoDB repository
 func NewMongoRepository[T types.MongoEntity[T]](client *mongo.Client, database, collection string) types.MongoRepository[T] {
 	return &MongoRepository[T]{
 		collection: client.Database(database).Collection(collection),
 	}
 }
 
-// Retrieves a specific document from the collection by its id
-func (repo MongoRepository[T]) GetById(ctx context.Context, id primitive.ObjectID) (T, error) {
+// GetByID retrieves a specific document from the collection by its id
+func (repo MongoRepository[T]) GetByID(ctx context.Context, id primitive.ObjectID) (T, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
@@ -63,7 +61,7 @@ func (repo MongoRepository[T]) GetById(ctx context.Context, id primitive.ObjectI
 	return item, nil
 }
 
-// Retrieves all documents from the collection
+// GetAll retrieves all documents from the collection
 func (repo MongoRepository[T]) GetAll(
 	ctx context.Context,
 	filter primitive.M,
@@ -115,7 +113,7 @@ func (repo MongoRepository[T]) GetAll(
 	return items, metadata, nil
 }
 
-// Inserts a new document in the collection
+// Create inserts a new document in the collection
 func (repo MongoRepository[T]) Create(ctx context.Context, MongoEntity T) (primitive.ObjectID, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
@@ -128,7 +126,7 @@ func (repo MongoRepository[T]) Create(ctx context.Context, MongoEntity T) (primi
 	return (result.InsertedID).(primitive.ObjectID), nil
 }
 
-// Updates a specific document from the collection
+// Update updates a specific document from the collection
 func (repo MongoRepository[T]) Update(ctx context.Context, MongoEntity T) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
@@ -150,7 +148,7 @@ func (repo MongoRepository[T]) Update(ctx context.Context, MongoEntity T) error 
 	return nil
 }
 
-// Deletes a specific document from the collection
+// Delete deletes a specific document from the collection
 func (repo MongoRepository[T]) Delete(ctx context.Context, id primitive.ObjectID) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()

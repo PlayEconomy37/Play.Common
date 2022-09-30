@@ -12,7 +12,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-// Sets up Opentelemetry with a Jaeger exporter or an in-memory exporter (when running tests)
+// SetupTracer sets up Opentelemetry with a Jaeger exporter or an in-memory exporter (when running tests)
 func SetupTracer(isTest bool) *sdktrace.TracerProvider {
 	var tracerProvider *sdktrace.TracerProvider
 
