@@ -24,19 +24,19 @@ var (
 )
 
 // MongoRepository is a generic MongoDB repository struct
-type MongoRepository[T types.MongoEntity[T]] struct {
+type MongoRepository[K, T types.MongoEntity[K, T]] struct {
 	collection *mongo.Collection
 }
 
 // NewMongoRepository creates a new MongoDB repository
-func NewMongoRepository[T types.MongoEntity[T]](client *mongo.Client, database, collection string) types.MongoRepository[T] {
-	return &MongoRepository[T]{
+func NewMongoRepository[K, T types.MongoEntity[K, T]](client *mongo.Client, database, collection string) types.MongoRepository[K, T] {
+	return &MongoRepository[K, T]{
 		collection: client.Database(database).Collection(collection),
 	}
 }
 
 // GetByID retrieves a specific document from the collection by its id
-func (repo MongoRepository[T]) GetByID(ctx context.Context, id primitive.ObjectID) (T, error) {
+func (repo MongoRepository[K, T]) GetByID(ctx context.Context, id K) (T, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
@@ -62,7 +62,7 @@ func (repo MongoRepository[T]) GetByID(ctx context.Context, id primitive.ObjectI
 }
 
 // GetAll retrieves all documents from the collection
-func (repo MongoRepository[T]) GetAll(
+func (repo MongoRepository[K, T]) GetAll(
 	ctx context.Context,
 	filter primitive.M,
 	findOpts filters.Filters,
@@ -114,20 +114,25 @@ func (repo MongoRepository[T]) GetAll(
 }
 
 // Create inserts a new document in the collection
-func (repo MongoRepository[T]) Create(ctx context.Context, MongoEntity T) (primitive.ObjectID, error) {
+func (repo MongoRepository[K, T]) Create(ctx context.Context, MongoEntity T) (*K, error) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
 	result, err := repo.collection.InsertOne(ctx, MongoEntity)
 	if err != nil {
-		return primitive.NilObjectID, err
+		return nil, err
 	}
 
-	return (result.InsertedID).(primitive.ObjectID), nil
+	id, ok := (result.InsertedID).(K)
+	if !ok {
+		return nil, err
+	}
+
+	return &id, nil
 }
 
 // Update updates a specific document from the collection
-func (repo MongoRepository[T]) Update(ctx context.Context, MongoEntity T) error {
+func (repo MongoRepository[K, T]) Update(ctx context.Context, MongoEntity T) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
@@ -149,7 +154,7 @@ func (repo MongoRepository[T]) Update(ctx context.Context, MongoEntity T) error 
 }
 
 // Delete deletes a specific document from the collection
-func (repo MongoRepository[T]) Delete(ctx context.Context, id primitive.ObjectID) error {
+func (repo MongoRepository[K, T]) Delete(ctx context.Context, id K) error {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 

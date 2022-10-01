@@ -8,10 +8,10 @@ import (
 )
 
 // MongoRepository is a generic MongoDB repository interface
-type MongoRepository[T MongoEntity[T]] interface {
-	GetByID(ctx context.Context, id primitive.ObjectID) (T, error)
+type MongoRepository[K, T MongoEntity[K, T]] interface {
+	GetByID(ctx context.Context, id K) (T, error)
 	GetAll(ctx context.Context, filter primitive.M, findOpts filters.Filters) ([]T, filters.Metadata, error)
-	Create(ctx context.Context, entity T) (primitive.ObjectID, error)
+	Create(ctx context.Context, entity T) (*K, error)
 	Update(ctx context.Context, entity T) error
-	Delete(ctx context.Context, id primitive.ObjectID) error
+	Delete(ctx context.Context, id K) error
 }
