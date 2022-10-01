@@ -17,22 +17,19 @@ type Config struct {
 		MaxIdleTimeMS int    `koanf:"MaxIdleTimeMs"`
 		MaxOpenConns  int    `koanf:"MaxOpenConns"`
 		MaxIdleConns  int    `koanf:"MaxIdleConns"`
-	} `koanf:"Db"`
+	} `koanf:"DB"`
 	SMTP struct {
 		Host     string `koanf:"Host"`
 		Port     int    `koanf:"Port"`
 		Username string `koanf:"Username"`
 		Password string `koanf:"Password"`
 		Sender   string `koanf:"Sender"`
-	} `koanf:"Smtp"`
+	} `koanf:"SMTP"`
 	RabbitMQ struct {
-		Host         string `koanf:"Host"`
-		Port         int    `koanf:"Port"`
-		User         string `koanf:"User"`
-		Password     string `koanf:"Password"`
-		ExchangeName string `koanf:"ExchangeName"`
-		BindingKey   string `koanf:"BindingKey"`
-		ConsumerTag  string `koanf:"ConsumerTag"`
+		Host     string `koanf:"Host"`
+		Port     int    `koanf:"Port"`
+		User     string `koanf:"User"`
+		Password string `koanf:"Password"`
 	} `koanf:"RabbitMQ"`
 }
 
