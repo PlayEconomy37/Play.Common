@@ -24,12 +24,12 @@ var (
 )
 
 // MongoRepository is a generic MongoDB repository struct
-type MongoRepository[K, T types.MongoEntity[K, T]] struct {
+type MongoRepository[K any, T types.MongoEntity[K, T]] struct {
 	collection *mongo.Collection
 }
 
 // NewMongoRepository creates a new MongoDB repository
-func NewMongoRepository[K, T types.MongoEntity[K, T]](client *mongo.Client, database, collection string) types.MongoRepository[K, T] {
+func NewMongoRepository[K any, T types.MongoEntity[K, T]](client *mongo.Client, database, collection string) types.MongoRepository[K, T] {
 	return &MongoRepository[K, T]{
 		collection: client.Database(database).Collection(collection),
 	}
