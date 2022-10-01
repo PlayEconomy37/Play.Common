@@ -8,7 +8,7 @@ import (
 )
 
 // MongoRepository is a generic MongoDB repository interface
-type MongoRepository[K, T MongoEntity[K, T]] interface {
+type MongoRepository[K any, T MongoEntity[K, T]] interface {
 	GetByID(ctx context.Context, id K) (T, error)
 	GetAll(ctx context.Context, filter primitive.M, findOpts filters.Filters) ([]T, filters.Metadata, error)
 	Create(ctx context.Context, entity T) (*K, error)
