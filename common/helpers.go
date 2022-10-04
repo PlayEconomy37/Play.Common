@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/x509"
+	"embed"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -11,7 +12,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 
@@ -257,8 +257,8 @@ func (app *App) Background(ctx context.Context, fn func(ctx context.Context)) {
 	}()
 }
 
-func (app *App) loadRsaPublicKey() (*rsa.PublicKey, error) {
-	bytes, err := os.ReadFile("/cert/id_rsa.pub")
+func (app *App) loadRsaPublicKey(fileSystem embed.FS) (*rsa.PublicKey, error) {
+	bytes, err := fileSystem.ReadFile("cert/id_rsa.pub")
 	if err != nil {
 		return nil, err
 	}

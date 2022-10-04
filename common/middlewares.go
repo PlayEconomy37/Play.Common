@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"net/http"
@@ -100,8 +101,8 @@ type AuthenticationRepository interface {
 
 // Authenticate is a middleware used to authenticate a user before acessing a certain route.
 // It extracts a JWT access token from the Authorization header and validates it.
-func (app *App) Authenticate(repository AuthenticationRepository, next http.Handler) http.Handler {
-	publicKey, err := app.loadRsaPublicKey()
+func (app *App) Authenticate(repository AuthenticationRepository, fileSystem embed.FS, next http.Handler) http.Handler {
+	publicKey, err := app.loadRsaPublicKey(fileSystem)
 	if err != nil {
 		app.Logger.Fatal(err, nil)
 	}
