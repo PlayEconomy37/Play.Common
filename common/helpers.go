@@ -2,12 +2,16 @@ package common
 
 import (
 	"context"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
@@ -251,4 +255,16 @@ func (app *App) Background(ctx context.Context, fn func(ctx context.Context)) {
 		// Execute the arbitrary function that we passed as the parameter
 		fn(ctx)
 	}()
+}
+
+func (app *App) loadRsaPublicKey() (*rsa.PublicKey, error) {
+	bytes, err := os.ReadFile("/cert/id_rsa.pub")
+	if err != nil {
+		return nil, err
+	}
+
+	block, _ := pem.Decode(bytes)
+	key, _ := x509.ParsePKCS1PublicKey(block.Bytes)
+
+	return key, nil
 }

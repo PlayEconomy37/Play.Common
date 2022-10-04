@@ -90,7 +90,7 @@ func (app *App) LogRequest(next http.Handler) http.Handler {
 
 // Interface for user struct
 type user interface {
-	ID() int64
+	GetID() int64
 }
 
 // AuthenticationRepository is an interface that defines the repository needed for authentication
@@ -101,6 +101,11 @@ type AuthenticationRepository interface {
 // Authenticate is a middleware used to authenticate a user before acessing a certain route.
 // It extracts a JWT access token from the Authorization header and validates it.
 func (app *App) Authenticate(repository AuthenticationRepository, next http.Handler) http.Handler {
+	publicKey, err := app.loadRsaPublicKey()
+	if err != nil {
+		app.Logger.Fatal(err, nil)
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Add the "Vary: Authorization" header to the response. This indicates to any
 		// caches that the response may vary based on the value of the Authorization
@@ -132,7 +137,8 @@ func (app *App) Authenticate(repository AuthenticationRepository, next http.Hand
 		// Parse the JWT and extract the claims. This will return an error if the JWT
 		// contents doesn't match the signature (i.e. the token has been tampered with)
 		// or the algorithm isn't valid.
-		claims, err := jwt.HMACCheck([]byte(token), []byte("app.config.jwt.secret"))
+
+		claims, err := jwt.RSACheck([]byte(token), publicKey)
 		if err != nil {
 			app.InvalidAuthenticationTokenResponse(w, r)
 			return
@@ -179,7 +185,7 @@ func (app *App) Authenticate(repository AuthenticationRepository, next http.Hand
 		}
 
 		// Call the contextSetUser() helper to add the user information to the request context
-		r = app.contextSetUser(r, user)
+		r = app.ContextSetUser(r, user)
 
 		// Call the next handler in the chain
 		next.ServeHTTP(w, r)
@@ -195,10 +201,10 @@ type AuthorizationRepository interface {
 func (app *App) RequirePermission(repository AuthorizationRepository, code string, next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve the user from the request context
-		user := app.contextGetUser(r)
+		user := app.ContextGetUser(r)
 
 		// Get the slice of permissions for the user
-		permissions, err := repository.GetAllForUser(r.Context(), user.ID())
+		permissions, err := repository.GetAllForUser(r.Context(), user.GetID())
 		if err != nil {
 			app.ServerErrorResponse(w, r, err)
 			return
