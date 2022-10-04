@@ -3,7 +3,6 @@ package message_broker
 import (
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"github.com/PlayEconomy37/Play.Common/configuration"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -22,6 +21,6 @@ func NewRabbitMQConnection(cfg *configuration.Config) (*amqp.Connection, error) 
 }
 
 // NewAzureServiceBusConnection initializes new Azure Service Bus connection
-func NewAzureServiceBusConnection(connectionString string) (*azservicebus.Client, error) {
-	return azservicebus.NewClientFromConnectionString(connectionString, nil)
-}
+// func NewAzureServiceBusConnection(connectionString string) (*azservicebus.Client, error) {
+// 	return azservicebus.NewClientFromConnectionString(connectionString, nil)
+// }

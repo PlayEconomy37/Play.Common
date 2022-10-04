@@ -3,7 +3,6 @@ module github.com/PlayEconomy37/Play.Common
 go 1.19
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.1.0
 	github.com/XSAM/otelsql v0.16.0
 	github.com/felixge/httpsnoop v1.0.3
 	github.com/go-chi/chi/v5 v5.0.7
@@ -22,9 +21,6 @@ require (
 )
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.3 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/internal v1.0.1 // indirect
-	golang.org/x/net v0.0.0-20221002022538-bcab6841153b // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
@@ -54,6 +50,7 @@ require (
 	go.opentelemetry.io/otel/metric v0.32.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect
+	golang.org/x/net v0.0.0-20221002022538-bcab6841153b // indirect
 	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 // indirect
 	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
 	golang.org/x/text v0.3.7 // indirect
