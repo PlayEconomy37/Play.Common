@@ -1,4 +1,4 @@
-package message_broker
+package events
 
 import "github.com/PlayEconomy37/Play.Common/permissions"
 
