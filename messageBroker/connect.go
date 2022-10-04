@@ -1,4 +1,4 @@
-package message_broker
+package messageBroker
 
 import (
 	"fmt"
