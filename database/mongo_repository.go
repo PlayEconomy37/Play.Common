@@ -61,6 +61,32 @@ func (repo MongoRepository[K, T]) GetByID(ctx context.Context, id K) (T, error) 
 	return item, nil
 }
 
+// GetByFilter retrieves a specific document from the collection by the given filter
+func (repo MongoRepository[K, T]) GetByFilter(ctx context.Context, filter primitive.M) (T, error) {
+	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
+	defer cancel()
+
+	var item T
+
+	err := repo.collection.
+		FindOne(ctx, filter).
+		Decode(&item)
+
+	// If there was no matching item found, Decode() will return
+	// a mongo.ErrNoDocuments error. We check for this and return our custom ErrRecordNotFound
+	// error instead.
+	if err != nil {
+		switch {
+		case errors.Is(err, mongo.ErrNoDocuments):
+			return item, ErrRecordNotFound
+		default:
+			return item, err
+		}
+	}
+
+	return item, nil
+}
+
 // GetAll retrieves all documents from the collection
 func (repo MongoRepository[K, T]) GetAll(
 	ctx context.Context,

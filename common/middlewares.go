@@ -91,17 +91,18 @@ func (app *App) LogRequest(next http.Handler) http.Handler {
 
 // Interface for user struct
 type user interface {
-	GetID() int64
+	getID() int64
+	getPermissions() permissions.Permissions
 }
 
-// AuthenticationRepository is an interface that defines the repository needed for authentication
-type AuthenticationRepository interface {
+// AuthRepository is an interface that defines the repository needed for authentication and authorization
+type AuthRepository interface {
 	GetByID(ctx context.Context, userID int64) (user, error)
 }
 
 // Authenticate is a middleware used to authenticate a user before acessing a certain route.
 // It extracts a JWT access token from the Authorization header and validates it.
-func (app *App) Authenticate(repository AuthenticationRepository, fileSystem embed.FS, next http.Handler) http.Handler {
+func (app *App) Authenticate(repository AuthRepository, fileSystem embed.FS, next http.Handler) http.Handler {
 	publicKey, err := app.loadRsaPublicKey(fileSystem)
 	if err != nil {
 		app.Logger.Fatal(err, nil)
@@ -193,19 +194,14 @@ func (app *App) Authenticate(repository AuthenticationRepository, fileSystem emb
 	})
 }
 
-// AuthorizationRepository is an interface that defines the repository needed for authorization
-type AuthorizationRepository interface {
-	GetAllForUser(ctx context.Context, userID int64) (permissions.Permissions, error)
-}
-
 // RequirePermission is a middleware used to check if user has the right permissions to access a certain route
-func (app *App) RequirePermission(repository AuthorizationRepository, code string, next http.HandlerFunc) http.HandlerFunc {
+func (app *App) RequirePermission(repository AuthRepository, code string, next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve the user from the request context
 		user := app.ContextGetUser(r)
 
 		// Get the slice of permissions for the user
-		permissions, err := repository.GetAllForUser(r.Context(), user.GetID())
+		user, err := repository.GetByID(r.Context(), user.getID())
 		if err != nil {
 			app.ServerErrorResponse(w, r, err)
 			return
@@ -213,7 +209,7 @@ func (app *App) RequirePermission(repository AuthorizationRepository, code strin
 
 		// Check if the slice includes the required permission. If it doesn't, then
 		// return a 403 Forbidden response.
-		if !permissions.Include(code) {
+		if !user.getPermissions().Include(code) {
 			app.NotPermittedResponse(w, r)
 			return
 		}
