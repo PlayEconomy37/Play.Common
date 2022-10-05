@@ -12,7 +12,6 @@ import (
 
 	"github.com/PlayEconomy37/Play.Common/database"
 	"github.com/PlayEconomy37/Play.Common/opentelemetry"
-	"github.com/PlayEconomy37/Play.Common/permissions"
 	"github.com/felixge/httpsnoop"
 	"github.com/pascaldekloe/jwt"
 )
@@ -89,15 +88,9 @@ func (app *App) LogRequest(next http.Handler) http.Handler {
 	})
 }
 
-// Interface for user struct
-type user interface {
-	getID() int64
-	getPermissions() permissions.Permissions
-}
-
 // AuthRepository is an interface that defines the repository needed for authentication and authorization
 type AuthRepository interface {
-	GetByID(ctx context.Context, id int64) (user, error)
+	GetByID(ctx context.Context, id int64) (database.User, error)
 }
 
 // Authenticate is a middleware used to authenticate a user before acessing a certain route.
@@ -207,7 +200,7 @@ func (app *App) RequirePermission(
 			user := app.ContextGetUser(r)
 
 			// Get the slice of permissions for the user
-			user, err := repository.GetByID(r.Context(), user.getID())
+			user, err := repository.GetByID(r.Context(), user.ID)
 			if err != nil {
 				app.ServerErrorResponse(w, r, err)
 				return
@@ -216,7 +209,7 @@ func (app *App) RequirePermission(
 			// Check if the slice includes the required permission. If it doesn't, then
 			// return a 403 Forbidden response.
 			for _, code := range codes {
-				if !user.getPermissions().Include(code) {
+				if !user.GetPermissions().Include(code) {
 					app.NotPermittedResponse(w, r)
 					return
 				}
