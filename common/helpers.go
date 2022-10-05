@@ -257,8 +257,8 @@ func (app *App) Background(ctx context.Context, fn func(ctx context.Context)) {
 	}()
 }
 
-func (app *App) loadRsaPublicKey(fileSystem embed.FS) (*rsa.PublicKey, error) {
-	bytes, err := fileSystem.ReadFile("cert/id_rsa.pub")
+func (app *App) LoadRsaPublicKey(fileSystem embed.FS, path string) (*rsa.PublicKey, error) {
+	bytes, err := fileSystem.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
