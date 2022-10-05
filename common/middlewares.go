@@ -195,7 +195,7 @@ func (app *App) Authenticate(repository AuthRepository, fileSystem embed.FS, nex
 }
 
 // RequirePermission is a middleware used to check if user has the right permissions to access a certain route
-func (app *App) RequirePermission(repository AuthRepository, code string, next http.HandlerFunc) http.HandlerFunc {
+func (app *App) RequirePermission(repository AuthRepository, code string, next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve the user from the request context
 		user := app.ContextGetUser(r)
