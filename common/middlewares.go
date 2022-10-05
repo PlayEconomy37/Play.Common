@@ -153,7 +153,7 @@ func (app *App) Authenticate(repository AuthRepository, fileSystem embed.FS) fun
 			}
 
 			// Check that the catalog service is in the expected audiences for the JWT
-			if !claims.AcceptAudience("http://localhost:4445") {
+			if !claims.AcceptAudience("http://localhost:3000") {
 				app.InvalidAuthenticationTokenResponse(w, r)
 				return
 			}
