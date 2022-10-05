@@ -97,7 +97,7 @@ type user interface {
 
 // AuthRepository is an interface that defines the repository needed for authentication and authorization
 type AuthRepository interface {
-	GetByID(ctx context.Context, userID int64) (user, error)
+	GetByID(ctx context.Context, id int64) (user, error)
 }
 
 // Authenticate is a middleware used to authenticate a user before acessing a certain route.
