@@ -38,9 +38,9 @@ func (f Filters) SortColumn() string {
 	panic("unsafe sort parameter: " + f.Sort)
 }
 
-// SortDirection is a helper method that returns the sort direction ("ASC" or "DESC")
+// SortDirectionMongo is a helper method that returns the sort direction (1 (ASC) or -1 (DESC))
 // depending on the prefix character of the `Sort` field
-func (f Filters) SortDirection() int8 {
+func (f Filters) SortDirectionMongo() int8 {
 	// Descending order
 	if strings.HasPrefix(f.Sort, "-") {
 		return -1
@@ -48,6 +48,18 @@ func (f Filters) SortDirection() int8 {
 
 	// Ascending order
 	return 1
+}
+
+// SortDirectionSQL is a helper method that returns the sort direction ("ASC" or "DESC")
+// depending on the prefix character of the `Sort` field
+func (f Filters) SortDirectionSQL() string {
+	// Descending order
+	if strings.HasPrefix(f.Sort, "-") {
+		return "DESC"
+	}
+
+	// Ascending order
+	return "ASC"
 }
 
 // Limit is a helper method returns the number of records to be returned in the query
