@@ -35,14 +35,14 @@ type Config struct {
 
 // LoadConfig reads configuration from a given file and from environment variables
 // (i.e. SMTP__Host=...).
-func LoadConfig(filePath string) (Config, error) {
+func LoadConfig(filePath string) (*Config, error) {
 	var config Config
 
 	configReader := koanf.New(".")
 
 	// Load JSON config
 	if err := configReader.Load(file.Provider(filePath), json.Parser()); err != nil {
-		return config, err
+		return nil, err
 	}
 
 	// Load environment variables and merge into the loaded config
@@ -57,8 +57,8 @@ func LoadConfig(filePath string) (Config, error) {
 
 	err := configReader.Unmarshal("", &config)
 	if err != nil {
-		return config, err
+		return nil, err
 	}
 
-	return config, nil
+	return &config, nil
 }
