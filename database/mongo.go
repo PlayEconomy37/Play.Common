@@ -12,7 +12,7 @@ import (
 )
 
 // NewMongoClient creates a new mongo client with given configuration
-func NewMongoClient(cfg configuration.Config) (*mongo.Client, error) {
+func NewMongoClient(cfg *configuration.Config) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 

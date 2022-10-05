@@ -17,7 +17,7 @@ import (
 )
 
 // NewPostgresDB creates a Postgres connection pool using given configuration
-func NewPostgresDB(cfg configuration.Config, automigrate bool, embeddedFiles embed.FS) (*sql.DB, error) {
+func NewPostgresDB(cfg *configuration.Config, automigrate bool, embeddedFiles embed.FS) (*sql.DB, error) {
 	// Instrument database with Opentelemetry
 	db, err := otelsql.Open("postgres", cfg.DB.Dsn, otelsql.WithAttributes(
 		semconv.DBSystemPostgreSQL,
