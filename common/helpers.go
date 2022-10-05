@@ -257,7 +257,7 @@ func (app *App) Background(ctx context.Context, fn func(ctx context.Context)) {
 	}()
 }
 
-func (app *App) LoadRsaPublicKey(fileSystem embed.FS, path string) (*rsa.PublicKey, error) {
+func LoadRsaPublicKey(fileSystem embed.FS, path string) (*rsa.PublicKey, error) {
 	bytes, err := fileSystem.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -265,6 +265,18 @@ func (app *App) LoadRsaPublicKey(fileSystem embed.FS, path string) (*rsa.PublicK
 
 	block, _ := pem.Decode(bytes)
 	key, _ := x509.ParsePKCS1PublicKey(block.Bytes)
+
+	return key, nil
+}
+
+func LoadRsaPrivateKey(fileSystem embed.FS, path string) (*rsa.PrivateKey, error) {
+	bytes, err := fileSystem.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	block, _ := pem.Decode(bytes)
+	key, _ := x509.ParsePKCS1PrivateKey(block.Bytes)
 
 	return key, nil
 }
