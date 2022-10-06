@@ -264,9 +264,9 @@ func LoadRsaPublicKey(fileSystem embed.FS, path string) (*rsa.PublicKey, error) 
 	}
 
 	block, _ := pem.Decode(bytes)
-	key, _ := x509.ParsePKCS1PublicKey(block.Bytes)
+	key, _ := x509.ParsePKIXPublicKey(block.Bytes)
 
-	return key, nil
+	return key.(*rsa.PublicKey), nil
 }
 
 func LoadRsaPrivateKey(fileSystem embed.FS, path string) (*rsa.PrivateKey, error) {
@@ -276,7 +276,7 @@ func LoadRsaPrivateKey(fileSystem embed.FS, path string) (*rsa.PrivateKey, error
 	}
 
 	block, _ := pem.Decode(bytes)
-	key, _ := x509.ParsePKCS1PrivateKey(block.Bytes)
+	key, _ := x509.ParsePKCS8PrivateKey(block.Bytes)
 
-	return key, nil
+	return key.(*rsa.PrivateKey), nil
 }
