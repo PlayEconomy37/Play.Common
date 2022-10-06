@@ -1,4 +1,4 @@
-package messageBroker
+package messagebroker
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-// NewRabbitMQConn initializes new RabbitMQ connection
+// NewRabbitMQConnection initializes new RabbitMQ connection
 func NewRabbitMQConnection(cfg *configuration.Config) (*amqp.Connection, error) {
 	connAddr := fmt.Sprintf(
 		"amqp://%s:%s@%s:%d/",
