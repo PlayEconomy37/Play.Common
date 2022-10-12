@@ -13,15 +13,33 @@ import (
 )
 
 var (
-	// ErrRecordNotFound is returned when trying to fetch an item
+	// ErrRecordNotFound is returned when trying to fetch a document
 	// that doesn't exist in our database
 	ErrRecordNotFound = errors.New("record not found")
 
-	// ErrEditConflict is returned when trying to update an item
+	// ErrEditConflict is returned when trying to update a document
 	// in which the document version does not match
 	// (or the record has been deleted).
 	ErrEditConflict = errors.New("edit conflict")
+
+	// ErrDuplicateKey is returned when trying to insert a document
+	// which contains a duplicate key (unique key which already exists in the database)
+	ErrDuplicateKey = errors.New("duplicate key")
 )
+
+// IsDuplicateKey returns whether err informs of a duplicate key error because
+// a primary key index or a secondary unique index already has an entry
+// with the given value
+func IsDuplicateKey(err error) bool {
+	if mongoErr, ok := err.(mongo.WriteException); ok {
+		for i := range mongoErr.WriteErrors {
+			if mongoErr.WriteErrors[i].Code == 11000 {
+				return true
+			}
+		}
+	}
+	return false
+}
 
 // MongoRepository is a generic MongoDB repository struct
 type MongoRepository[K any, T types.MongoEntity[K, T]] struct {
@@ -151,7 +169,12 @@ func (repo MongoRepository[K, T]) Create(ctx context.Context, MongoEntity T) (*K
 
 	result, err := repo.collection.InsertOne(ctx, MongoEntity)
 	if err != nil {
-		return nil, err
+		switch {
+		case IsDuplicateKey(err):
+			return nil, ErrDuplicateKey
+		default:
+			return nil, err
+		}
 	}
 
 	id, ok := (result.InsertedID).(K)

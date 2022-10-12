@@ -7,8 +7,8 @@ require (
 	github.com/felixge/httpsnoop v1.0.3
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/golang-migrate/migrate/v4 v4.15.2
+	github.com/jackc/pgx/v5 v5.0.2
 	github.com/knadh/koanf v1.4.3
-	github.com/lib/pq v1.10.7
 	github.com/prometheus/client_golang v1.13.0
 	github.com/xhit/go-simple-mail/v2 v2.12.0
 	go.mongodb.org/mongo-driver v1.10.2
@@ -30,7 +30,10 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/klauspost/compress v1.15.11 // indirect
+	github.com/lib/pq v1.10.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
