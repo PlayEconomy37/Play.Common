@@ -31,6 +31,10 @@ type Config struct {
 		User     string `koanf:"User"`
 		Password string `koanf:"Password"`
 	} `koanf:"RabbitMQ"`
+	RSA struct {
+		PublicKey  string `koanf:"PublicKey"`
+		PrivateKey string `koanf:"PrivateKey"`
+	} `koanf:"RSA"`
 }
 
 // LoadConfig reads configuration from a given file and from environment variables
