@@ -97,7 +97,7 @@ type AuthRepository interface {
 // It extracts a JWT access token from the Authorization header and validates it.
 func (app *App) Authenticate(repository AuthRepository, fileSystem embed.FS) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		publicKey, err := LoadRsaPublicKey(fileSystem, "cert/id_rsa.pub")
+		publicKey, err := LoadRsaPublicKey(app.Config.RSA.PublicKey)
 		if err != nil {
 			app.Logger.Fatal(err, nil)
 		}
